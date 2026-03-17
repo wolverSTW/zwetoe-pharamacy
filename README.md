@@ -34,6 +34,21 @@ Located in `/frontend`, this directory contains the high-performance Next.js sto
 - **`README.md`** — The primary onboarding and setup guide.
 - **`erd.md`** — Entity-Relationship Diagram outlining the database schema.
 
+## 📅 Development Timeline
+
+The application was purposefully built through the following milestone phases:
+
+- **Mar 01** — Baseline Setup: Initial repository structure for Next.js and Laravel.
+- **Mar 03** — Core Database: Designed schema and defined Eloquent models.
+- **Mar 05** — API Authentication: Implemented Sanctum authentication and AuthController.
+- **Mar 07** — Security layer: Built Spatie RBAC for Admin and Customer roles.
+- **Mar 09** — Category Module: Created Category management with Filament Resource.
+- **Mar 11** — Inventory Module: Built Medicine inventory management with expiry alerts.
+- **Mar 13** — Frontend Client: Configured Axios interceptors and centralized API service.
+- **Mar 15** — State Management: Implemented global Cart context for the storefront.
+- **Mar 16** — UI Implementation: Built dynamic product grid with category filtering.
+- **Mar 17** — Product Views: Implemented detailed product modals and quantity selection.
+
 ## Prerequisites
 
 - PHP 8.2+, Composer
