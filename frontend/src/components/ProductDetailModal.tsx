@@ -23,11 +23,11 @@ export default function ProductDetailModal({ item, onClose }: any) {
   const handleCartAction = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    console.log("Add to Cart Clicked for:", item.Name);
+    console.log("Add to Cart Clicked for:", item.name);
     
     try {
       addToCart(item, quantity);
-      toast.success(`${item.Name} added to cart!`);
+      toast.success(`${item.name} added to cart!`);
       onClose();
     } catch (error) {
       console.error("Cart Action Error:", error);

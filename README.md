@@ -7,8 +7,7 @@ Full-stack pharmacy POS, inventory, and ecommerce platform with Laravel 11 (API 
 
 - Backend: Laravel 11, Sanctum auth, Filament v3 admin, Spatie Permission RBAC, queues.
 - Frontend: Next.js 16 (App Router), React 19, Tailwind 4, axios client.
-- Database: SQLite for local; MySQL 8.0 for staging/production.
-- CI cadence: two-week release rhythm with protected `main`.
+- Database: SQLite for local; MySQL 8.0 for staging/production (optional).
 
 ## 🏗️ Application Architecture
 
@@ -97,20 +96,11 @@ Backend:
 Frontend:
 
 - `npm run dev` - Next.js dev server.
-- `npm run lint` - linting.
+- `npm run test` - Jest unit and component tests.
 - `npm run build` - production build.
-
-## Release Workflow (Two-Week Cadence)
-
-- Day 1: create `release/YYYY-MM-DD` and a tracking issue with scope/checklist.
-- Mon-Thu: short-lived feature branches; daily rebase on `main`; keep draft PRs open.
-- Day 7: merge ready PRs into the release branch; run full tests/linters; update changelog.
-- Days 10-12: feature freeze; only bugfix PRs; tag `vX.Y.0-rc1`.
-- Day 14: merge release branch to `main`, tag `vX.Y.0`, publish notes; bump version on `main` to next dev.
-- Guardrails: protect `main`, require reviews, CI on every PR, daily status in the release issue.
 
 ## Troubleshooting
 
-- Jobs not processing: start `php artisan queue:listen` (or use `composer run dev`).
-- Images 404: rerun `php artisan storage:link`.
-- API calls failing: confirm `NEXT_PUBLIC_API_URL` matches backend host/port and Sanctum cookie domain.
+- **Images 404**: Rerun `php artisan storage:link` to ensure the public disk is connected.
+- **API calls failing**: Confirm `NEXT_PUBLIC_API_URL` accurately matches the backend host/port in your `.env.local`.
+- **Database errors**: For local development, ensure the `database/database.sqlite` file exists or run `php artisan migrate`.

@@ -1,0 +1,39 @@
+
+> frontend@0.1.0 test
+> jest src/__tests__/ProductDetailModal.test.tsx
+
+  console.log
+    Add to Cart Clicked for: undefined
+
+      at log (src/components/ProductDetailModal.tsx:26:13)
+
+FAIL src/__tests__/ProductDetailModal.test.tsx
+  ProductDetailModal
+    √ renders the product details accurately (215 ms)
+    √ displays the calculated subtotal for 1 item (32 ms)
+    × triggers Add to Cart logic with the current quantity (165 ms)
+
+  ● ProductDetailModal › triggers Add to Cart logic with the current quantity
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: "Paracetamol added to cart!"
+    Received: "undefined added to cart!"
+
+    Number of calls: 1
+
+    [0m [90m 68 |[39m
+     [90m 69 |[39m         expect(mockAddToCart)[33m.[39mtoHaveBeenCalledWith(mockItem[33m,[39m [35m1[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 70 |[39m         expect(toast[33m.[39msuccess)[33m.[39mtoHaveBeenCalledWith([32m'Paracetamol added to cart!'[39m)[33m;[39m
+     [90m    |[39m                               [31m[1m^[22m[39m
+     [90m 71 |[39m         expect(mockClose)[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m 72 |[39m     })[33m;[39m
+     [90m 73 |[39m })[33m;[39m[0m
+
+      at Object.toHaveBeenCalledWith (src/__tests__/ProductDetailModal.test.tsx:70:31)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 2 passed, 3 total
+Snapshots:   0 total
+Time:        9.139 s
+Ran all test suites matching src/__tests__/ProductDetailModal.test.tsx.

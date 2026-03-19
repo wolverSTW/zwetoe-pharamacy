@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('payment_method')->default('pick-up')->after('status');
-            $table->string('payment_status')->default('pending')->after('payment_method');
+            if (!Schema::hasColumn('orders', 'payment_method')) {
+                $table->string('payment_method')->default('pick-up')->after('status');
+            }
+            if (!Schema::hasColumn('orders', 'payment_status')) {
+                $table->string('payment_status')->default('pending')->after('payment_method');
+            }
         });
     }
 
