@@ -26,6 +26,7 @@ export default function CartPage() {
   const [savedAddress, setSavedAddress] = useState<any>(null);
   const [finalTotal, setFinalTotal] = useState(0);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [invoiceNumber, setInvoiceNumber] = useState<string | null>(null);
   const [addressForm, setAddressForm] = useState({ house_number: "", street: "", town: "", township: "", region: "", phone: "" });
 
   const [showQRModal, setShowQRModal] = useState(false);
@@ -54,7 +55,7 @@ export default function CartPage() {
 
     setFinalTotal(totalAmount);
     setPurchasedItems([...cart]);
-    setQrImage("/images/qr/kbz-pay-qr.jpg"); 
+    setQrImage(`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}/images/qr/kbz-pay-qr.jpg`); 
     setModalView("payment");
     setShowQRModal(true);
   };
@@ -101,6 +102,7 @@ export default function CartPage() {
 
       if (response.status === 201) {
         setOrderId(response.data.order_id);
+        setInvoiceNumber(response.data.invoice_number);
         setModalView("success");
         clearCart();
       }
@@ -205,7 +207,7 @@ export default function CartPage() {
                       </div>
                       <div>
                         <h4 className="font-bold text-sm text-white">{item.name}</h4>
-                        <p className="text-emerald-500 text-xs font-semibold">{item.price.toLocaleString()} MMK x {item.quantity}</p>
+                        <p className="text-emerald-500 text-xs font-semibold">{(item.sell_price || item.price || 0).toLocaleString()} MMK x {item.quantity}</p>
                       </div>
                     </div>
                     <button onClick={() => removeFromCart(item.id)} className="text-gray-500 hover:text-red-500 text-xs font-bold px-3 py-1 border border-[#1a1d23] rounded-md transition-all">Remove</button>
@@ -216,7 +218,7 @@ export default function CartPage() {
           </div>
 
           {/* --- Sidebar Summary --- */}
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-5 no-print">
             <div className="bg-[#0f1115] p-8 md:p-10 rounded-[2.5rem] border border-[#1a1d23] sticky top-24 shadow-2xl">
               <h3 className="text-xs font-bold uppercase tracking-[0.2em] mb-8 text-gray-500">Price Details</h3>
               <div className="space-y-4 mb-8 pt-6 border-t border-[#1a1d23]">
@@ -236,8 +238,9 @@ export default function CartPage() {
 
       {/* --- QR/Invoice Modal --- */}
       {showQRModal && (
-        <div className="fixed inset-0 bg-[#05070a]/95 backdrop-blur-md flex items-center justify-center z-60 p-4 animate-in fade-in duration-300">
-          <div className="bg-[#0f1115] rounded-2xl border border-[#1a1d23] max-w-5xl w-full overflow-hidden shadow-2xl flex flex-col md:flex-row relative">
+        <div className="fixed inset-0 bg-[#05070a]/95 backdrop-blur-md flex items-center justify-center z-60 p-4 animate-in fade-in duration-300 print:bg-white print:p-0">
+          <div className="absolute inset-0 bg-[#05070a]/95 backdrop-blur-md no-print print:hidden" onClick={() => setShowQRModal(false)}></div>
+          <div className="bg-[#0f1115] rounded-2xl border border-[#1a1d23] max-w-5xl w-full overflow-hidden shadow-2xl flex flex-col md:flex-row relative print:bg-white print:h-[29.7cm] print:max-w-none print:border-none print:shadow-none print:block">
             {modalView !== "success" && (
               <button onClick={() => modalView === "invoice" ? setModalView("payment") : setShowQRModal(false)} className="absolute top-6 left-6 z-20 p-2 bg-[#1a1d23] hover:bg-white text-gray-400 hover:text-black rounded-full transition-all no-print"><BackIcon /></button>
             )}
@@ -281,10 +284,10 @@ export default function CartPage() {
                     </button>
                   </div>
                 </div>
-                <div className="bg-white p-10 md:p-16 flex flex-col items-center justify-center md:w-1/2">
+                <div className="bg-white p-10 md:p-16 flex flex-col items-center justify-center md:w-1/2 no-print print:hidden">
                    <p className="text-xs font-bold text-blue-600 tracking-widest pb-4 uppercase">Step 2: Scan with KBZPay</p>
                    <div className="w-full max-w-70 aspect-square border-4 border-gray-100 p-2 rounded-xl">
-                      <img src={qrImage || "/images/qr/kbz-pay-qr.jpg"} alt="QR" className="w-full h-full object-contain" />
+                      <img src={qrImage || `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}/images/qr/kbz-pay-qr.jpg`} alt="QR" className="w-full h-full object-contain" />
                    </div>
                    <div className="mt-8 text-center text-black">
                       <p className="text-sm font-black tracking-widest uppercase">Zwe Toe Pharmacy</p>
@@ -294,31 +297,94 @@ export default function CartPage() {
               </>
             ) : modalView === "invoice" ? (
               <div className="flex-1 p-6 md:p-12 flex flex-col items-center justify-center bg-[#05070a]">
-                <div className="max-w-md w-full bg-white text-black p-8 md:p-10 rounded-3xl shadow-2xl relative">
-                  <div className="flex justify-between items-start border-b-2 border-dashed border-gray-200 pb-6 mb-6">
+                <div id="invoice-print-area" className="w-[21cm] h-[29.7cm] min-h-[29.7cm] max-h-[29.7cm] bg-white text-black p-[2cm] rounded-none shadow-none relative print-container mx-auto overflow-hidden print:m-0 print:border-none">
+                  {/* Corporate Header */}
+                  <div className="flex justify-between items-start mb-16 px-4">
                     <div>
-                      <h3 className="text-xl font-black uppercase">Invoice</h3>
-                      <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase">Pending Confirmation</p>
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center font-bold text-white text-2xl">+</div>
+                        <h1 className="text-3xl font-black uppercase tracking-tighter">Receipt</h1>
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">Invoice Number</p>
+                          <p className="text-sm font-black">{invoiceNumber || (orderId ? `#STW-${orderId}` : `DRAFT-${Math.floor(Date.now()/1000)}`)}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">Date Issued</p>
+                          <p className="text-sm font-black">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                        </div>
+                      </div>
                     </div>
                     <div className="text-right">
-                       <p className="text-lg font-black tracking-tight leading-none">ZweToe</p>
-                       <p className="text-[10px] font-bold text-emerald-600 uppercase">Pharmacy</p>
+                       <h2 className="text-xl font-black tracking-tight leading-none mb-1">ZweToe Pharmacy</h2>
+                       <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-4">Official Dispensary</p>
+                       <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider leading-relaxed">
+                         <p>No. 51, Bo Yone Street</p>
+                         <p>Thegon, Bago West</p>
+                         <p>Myanmar</p>
+                         <p className="mt-2 text-black">zwetoe.com</p>
+                       </div>
                     </div>
                   </div>
-                  <div className="space-y-3 mb-8 max-h-64 overflow-y-auto pr-2 custom-scroll">
-                    {purchasedItems.map((item: any) => (
-                      <div key={item.id} className="flex justify-between text-xs font-bold">
-                        <span className="flex-1 pr-4">{item.name} <span className="text-gray-400 ml-1">x{item.quantity}</span></span>
-                        <span>{(item.price * (item.quantity || 1)).toLocaleString()}</span>
-                      </div>
-                    ))}
+
+                  {/* Transaction Table */}
+                  <div className="mb-16">
+                    <table className="w-full text-left border-collapse border-b border-gray-100">
+                      <thead>
+                        <tr className="border-b-2 border-black">
+                          <th className="py-4 text-[10px] font-black uppercase tracking-widest">Medical Description</th>
+                          <th className="py-4 text-[10px] font-black uppercase tracking-widest text-center">Quantity</th>
+                          <th className="py-4 text-[10px] font-black uppercase tracking-widest text-right">Amount (MMK)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {purchasedItems.map((item: any) => (
+                          <tr key={item.id} className="text-xs font-bold border-b border-gray-50">
+                            <td className="py-5 pr-4 text-black">{item.name}</td>
+                            <td className="py-5 text-center text-gray-600">{item.quantity}</td>
+                            <td className="py-5 text-right text-black">{( (item.sell_price || item.price || 0) * (item.quantity || 1)).toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                  <div className="border-t-4 border-black pt-6 flex justify-between items-center font-black">
-                    <span className="text-xs uppercase tracking-widest">Grand Total</span>
-                    <span className="text-2xl">{finalTotal.toLocaleString()} MMK</span>
+
+                  {/* Financial Summary */}
+                  <div className="flex flex-col items-end pt-8 px-4">
+                    <div className="w-full max-w-[200px] space-y-3">
+                      <div className="flex justify-between text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                        <span>Subtotal</span>
+                        <span>{finalTotal.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                        <span>GST (0%)</span>
+                        <span>0.00</span>
+                      </div>
+                      <div className="flex justify-between items-center text-2xl font-black border-t-2 border-black pt-4 mt-4">
+                        <span className="text-xs uppercase self-center tracking-widest">Total MMK</span>
+                        <span>{finalTotal.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Corporate Footer */}
+                  <div className="absolute bottom-10 left-0 right-0 text-center">
+                    <div className="inline-block px-4 py-1.5 bg-gray-50 rounded-full mb-6">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center justify-center gap-2">
+                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                         Payment Status: Verified (KBZPay)
+                      </p>
+                    </div>
+                    <p className="text-[11px] font-bold text-gray-300 uppercase tracking-[0.4em]">ZweToe Pharmacy — Authority in Medicine</p>
                   </div>
                 </div>
-                <button onClick={() => window.print()} className="mt-6 px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-bold uppercase transition-all no-print">Print Receipt</button>
+                <button onClick={() => {
+                  const originalTitle = document.title;
+                  document.title = "zwetoe_invoice";
+                  window.print();
+                  document.title = originalTitle;
+                }} className="mt-6 px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-bold uppercase transition-all no-print">Print Receipt</button>
               </div>
             ) : (
               <div className="flex-1 p-12 md:p-24 flex flex-col items-center justify-center text-center space-y-6 bg-[#0f1115]">
@@ -339,7 +405,69 @@ export default function CartPage() {
         .custom-scroll::-webkit-scrollbar { width: 3px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        @media print { .no-print { display: none !important; } body { background: white !important; } }
+        
+        @media print { 
+          @page {
+            size: A4;
+            margin: 0;
+          }
+          .no-print, nav, header, footer, .chatbot-container, [class*="AIChatbot"] { 
+            display: none !important; 
+          } 
+          
+          /* Nuclear option: hide all siblings of the print area */
+          #invoice-print-area {
+            display: block !important;
+            visibility: visible !important;
+          }
+          
+          body, html, main { 
+            background: white !important; 
+            color: black !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 21cm !important;
+            height: auto !important;
+             -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          .fixed.inset-0 { 
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            background: white !important;
+            display: block !important;
+            padding: 0 !important;
+            width: 21cm !important;
+            z-index: auto !important;
+          }
+
+          #invoice-print-area {
+            position: relative !important;
+            margin: 0 auto !important;
+            padding: 1.5cm 2cm !important;
+            width: 21cm !important;
+            min-height: 29.7cm !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            background: white !important;
+            display: block !important;
+          }
+
+          /* Ensure high-contrast for PDF */
+          .text-emerald-600 { color: #059669 !important; }
+          .text-gray-500 { color: #6b7280 !important; }
+          .border-black { border-color: #000000 !important; }
+          
+          table { width: 100% !important; border-collapse: collapse !important; }
+          th, td { border-bottom: 1px solid #e5e7eb !important; font-family: serif !important; }
+          .border-b-4 { border-bottom-width: 4px !important; }
+          .border-t-4 { border-top-width: 4px !important; }
+          .border-y-2 { border-top-width: 2px !important; border-bottom-width: 2px !important; }
+          .font-serif { font-family: 'Times New Roman', serif !important; }
+        }
+
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
         .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
       `}</style>

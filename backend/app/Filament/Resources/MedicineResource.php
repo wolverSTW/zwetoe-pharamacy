@@ -8,25 +8,45 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class MedicineResource extends Resource
 {
     protected static ?string $model = Medicine::class;
 
-    // Sidebar navigation icon and group
-    protected static ?string $navigationIcon = 'heroicon-o-beaker';
+    protected static ?string $navigationIcon  = 'heroicon-o-beaker';
     protected static ?string $navigationGroup = 'Products Management';
+    protected static ?string $navigationLabel = 'Medicines';
+    protected static ?int    $navigationSort  = 1;
 
-    /**
-     * Define the Form for creating and editing medicines
-     */
+    public static function getNavigationBadge(): ?string
+    {
+        $count = Medicine::where('stock_quantity', '<=', 5)->count();
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'danger';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Low stock medicines';
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                // Section 1: Basic Information
                 Forms\Components\Section::make('Basic Information')
                     ->description('General medicine information and classification.')
                     ->schema([
@@ -50,7 +70,6 @@ class MedicineResource extends Resource
                             ->required(),
                     ])->columns(2),
 
-                // Section 2: Pricing and Inventory
                 Forms\Components\Section::make('Pricing & Inventory')
                     ->schema([
                         Forms\Components\TextInput::make('buy_price')
@@ -74,29 +93,43 @@ class MedicineResource extends Resource
                             ->required(),
                     ])->columns(2),
 
-                // Section 3: Media and Visibility
                 Forms\Components\Section::make('Media & Status')
                     ->schema([
                         Forms\Components\FileUpload::make('image')
                             ->image()
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->directory(function (Get $get) {
+                            ->saveUploadedFileUsing(function (UploadedFile $file, Get $get): string {
                                 $categoryId = $get('category_id');
+                                $dir = 'medicines';
                                 if ($categoryId) {
                                     $category = \App\Models\Category::find($categoryId);
                                     if ($category && $category->slug) {
-                                        return "medicines/{$category->slug}";
+                                        $dir .= "/{$category->slug}";
                                     }
                                 }
-                                return 'medicines';
+
+                                $baseName = \Illuminate\Support\Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+                                $filename = $baseName . '.webp';
+                                $tempPath = tempnam(sys_get_temp_dir(), 'webp');
+
+                                if (str_contains($file->getMimeType(), 'webp')) {
+                                    return Storage::disk('public')->putFileAs($dir, $file, $filename);
+                                }
+
+                                try {
+                                    $manager = new ImageManager(new Driver());
+                                    $image = $manager->read($file->getRealPath());
+                                    $image->cover(600, 600);
+                                    $image->toWebp(80)->save($tempPath);
+                                    $storedPath = Storage::disk('public')->putFileAs($dir, new \Illuminate\Http\File($tempPath), $filename);
+                                    @unlink($tempPath);
+                                    return $storedPath;
+                                } catch (\Throwable $e) {
+                                    $ext = $file->getClientOriginalExtension();
+                                    $safeName = $baseName . '.' . $ext;
+                                    return Storage::disk('public')->putFileAs($dir, $file, $safeName);
+                                }
                             })
-                            ->imageResizeMode('cover')
-                            ->imageCropAspectRatio('1:1')
-                            ->imageResizeTargetWidth('600')
-                            ->imageResizeTargetHeight('600')
-                            ->maxSize(1024)
-                            // ->imageEditor() // Allows cropping/rotating
-                            ->preserveFilenames()
+                            ->maxSize(2048)
                             ->previewable(true),
 
                         Forms\Components\Toggle::make('is_active')
@@ -106,48 +139,72 @@ class MedicineResource extends Resource
             ]);
     }
 
-    /**
-     * Define the Table to list medicines
-     */
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
-                    ->label('Thumbnail')
+                    ->label('')
                     ->disk('public')
                     ->visibility('public')
-                    ->circular(),
+                    ->circular()
+                    ->size(40),
 
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable()
+                    ->weight('semibold')
                     ->description(fn (Medicine $record): string => $record->generic_name ?? ''),
 
                 Tables\Columns\TextColumn::make('category.name')
                     ->badge()
                     ->color('info')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('sell_price')
-                    ->money('MMK')
-                    ->sortable(),
+                    ->formatStateUsing(fn ($state) => number_format($state) . ' MMK')
+                    ->sortable()
+                    ->weight('semibold'),
 
-                // Display stock and change color if low
                 Tables\Columns\TextColumn::make('stock_quantity')
                     ->label('Stock')
-                    ->numeric()
-                    ->color(fn (int $state): string => $state < 10 ? 'danger' : 'success')
+                    ->badge()
+                    ->color(fn (int $state): string => match (true) {
+                        $state <= 0  => 'danger',
+                        $state <= 5  => 'danger',
+                        $state <= 15 => 'warning',
+                        default      => 'success',
+                    })
+                    ->formatStateUsing(fn (int $state): string => $state <= 0 ? '⚠ Out' : $state . ' units')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('expiry_date')
                     ->date('d-M-Y')
-                    ->sortable(),
+                    ->color(fn (?string $state): string => $state && \Carbon\Carbon::parse($state)->isPast()
+                        ? 'danger'
+                        : (\Carbon\Carbon::parse($state)->diffInDays(now()) < 90 ? 'warning' : 'gray'))
+                    ->sortable()
+                    ->toggleable(),
+
+                Tables\Columns\IconColumn::make('is_active')
+                    ->label('Active')
+                    ->boolean()
+                    ->trueIcon('heroicon-m-check-circle')
+                    ->falseIcon('heroicon-m-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category_id')
                     ->label('Filter by Category')
                     ->relationship('category', 'name'),
+                Filter::make('low_stock')
+                    ->label('Critical / Low Stock')
+                    ->query(fn (Builder $query): Builder => $query->where('stock_quantity', '<=', 10))
+                    ->indicator('Low Stock'),
+                Tables\Filters\TernaryFilter::make('is_active')
+                    ->label('Availability'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -156,8 +213,14 @@ class MedicineResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('toggle_availability')
+                        ->label('Toggle Availability')
+                        ->icon('heroicon-o-eye')
+                        ->action(fn (Collection $records) => $records->each(fn ($record) => $record->update(['is_active' => !$record->is_active])))
+                        ->deselectRecordsAfterCompletion(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('stock_quantity', 'asc');
     }
 
     public static function getRelations(): array
@@ -168,9 +231,9 @@ class MedicineResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListMedicines::route('/'),
+            'index'  => Pages\ListMedicines::route('/'),
             'create' => Pages\CreateMedicine::route('/create'),
-            'edit' => Pages\EditMedicine::route('/{record}/edit'),
+            'edit'   => Pages\EditMedicine::route('/{record}/edit'),
         ];
     }
 }

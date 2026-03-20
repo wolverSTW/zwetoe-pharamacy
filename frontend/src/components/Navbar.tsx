@@ -20,7 +20,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-[#0d1117]/90 border-b border-white/5 py-3 px-6 sticky top-0 z-50 backdrop-blur-md shadow-lg">
+    <nav className="bg-[#0d1117]/90 border-b border-white/5 py-3 px-6 sticky top-0 z-50 backdrop-blur-md shadow-lg no-print">
       <div className="container mx-auto flex items-center justify-between relative"> {/* relative ထည့်ထားတာက absolute center အတွက်ပါ */}
         
         {/* --- Left Side: Logo --- */}

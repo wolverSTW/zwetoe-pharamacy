@@ -77,6 +77,7 @@ class OrderController extends Controller
                 return response()->json([
                     'message' => 'Order placed successfully!',
                     'order_id' => $order->id,
+                    'invoice_number' => $order->invoice_number,
                     'grand_total' => $totalAmount,
                 ], 201);
             });

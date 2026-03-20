@@ -8,7 +8,8 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class MedicineStats extends BaseWidget
 {
-    protected static ?int $sort = 1;
+    protected static ?int $sort = 99;
+    protected static bool $isDiscovered = false; // Hidden — data merged into MainStatsOverview
 
     protected function getStats(): array
     {
