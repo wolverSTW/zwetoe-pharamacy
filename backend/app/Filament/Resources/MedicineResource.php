@@ -94,41 +94,40 @@ class MedicineResource extends Resource
                                     }
                                 }
 
-                                // 2. Generate Clean WebP Filename
+                                // 2. Generate Clean Filename
                                 $baseName = \Illuminate\Support\Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
                                 $filename = $baseName . '.webp';
                                 $tempPath = tempnam(sys_get_temp_dir(), 'webp');
 
-                                // 3. Convert to WebP using Intervention Image
+                                // 3. FAST PATH: If already WebP, just save with clean name
+                                if (str_contains($file->getMimeType(), 'webp')) {
+                                    return Storage::disk('public')->putFileAs($dir, $file, $filename);
+                                }
+
+                                // 4. CONVERSION PATH: Use Intervention Image 3
                                 try {
                                     $manager = new ImageManager(new Driver());
                                     $image = $manager->read($file->getRealPath());
+
+                                    // Resize to 600x600 (Cover mode) to save memory and loading time
+                                    $image->cover(600, 600);
                                     
-                                    // 4. Encode to WebP and save to temp
+                                    // Encode to WebP (80% quality)
                                     $image->toWebp(80)->save($tempPath);
+                                    
+                                    // Store in Public Disk
+                                    $storedPath = Storage::disk('public')->putFileAs($dir, new \Illuminate\Http\File($tempPath), $filename);
+                                    @unlink($tempPath);
+                                    return $storedPath;
                                 } catch (\Throwable $e) {
-                                    // FALLBACK: If conversion fails, save original file with .webp extension (risky, but user wants it)
-                                    // Actually, better to just save original as original if it fails.
+                                    // ABSOLUTE FALLBACK: Just save original with its original name but WARN in logs
+                                    // (Prevents upload failure if file is corrupt)
                                     $ext = $file->getClientOriginalExtension();
-                                    $safeName = \Illuminate\Support\Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $ext;
+                                    $safeName = $baseName . '.' . $ext;
                                     return Storage::disk('public')->putFileAs($dir, $file, $safeName);
                                 }
-
-                                // 5. Store in Public Disk
-                                $storedPath = Storage::disk('public')->putFileAs($dir, new \Illuminate\Http\File($tempPath), $filename);
-                                
-                                // 6. Cleanup
-                                @unlink($tempPath);
-
-                                return $storedPath;
                             })
-                            ->imageResizeMode('cover')
-                            ->imageCropAspectRatio('1:1')
-                            ->imageResizeTargetWidth('600')
-                            ->imageResizeTargetHeight('600')
-                            ->maxSize(1024)
-                            // ->imageEditor() // Allows cropping/rotating
-                            ->preserveFilenames()
+                            ->maxSize(2048) // 2MB limit
                             ->previewable(true),
 
                         Forms\Components\Toggle::make('is_active')

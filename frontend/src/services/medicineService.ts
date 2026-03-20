@@ -10,8 +10,12 @@ export const medicineService = {
       const { data } = await axiosInstance.get("/medicines");
       return data.data || data; 
     } catch (error: any) {
-      console.error("Medicine Service Error:", error);
-      throw error.response?.data || { message: "Failed to fetch medicines" };
+      console.error("Medicine Service Error Details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      throw error.response?.data || { message: error.message || "Failed to fetch medicines" };
     }
   },
 
