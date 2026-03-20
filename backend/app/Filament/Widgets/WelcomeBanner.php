@@ -23,6 +23,7 @@ class WelcomeBanner extends Widget
             'pendingOrders' => Order::where('status', 'pending')->count(),
             'lowStockCount' => Medicine::where('stock_quantity', '<', 10)->count(),
             'userName'      => $user ? $user->name : 'Admin',
+            'lastUpdate'    => now()->format('h:i A'),
         ];
     }
 

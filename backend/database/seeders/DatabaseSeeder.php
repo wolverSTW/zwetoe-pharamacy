@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Medicine;
+use App\Models\Order;
+use App\Models\Customer;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -55,6 +57,45 @@ class DatabaseSeeder extends Seeder
             'stock_quantity' => 50,
             'expiry_date' => '2026-06-15',
             'is_active' => true,
+        ]);
+        // Create Sample Customer
+        $customer = Customer::create([
+            'name' => 'John Doe',
+            'email' => 'customer@gmail.com',
+            'phone' => '09123456789',
+            'password' => 'password123',
+            'status' => 'approved',
+        ]);
+
+        // Create Sample Orders
+        $order1 = Order::create([
+            'customer_id' => $customer->id,
+            'total_amount' => 1600,
+            'status' => 'completed',
+            'payment_status' => 'paid',
+            'created_at' => now()->subDays(2),
+        ]);
+
+        $order1->items()->create([
+            'medicine_id' => 1,
+            'quantity' => 2,
+            'unit_price' => 800,
+            'subtotal' => 1600,
+        ]);
+
+        $order2 = Order::create([
+            'customer_id' => 1,
+            'total_amount' => 2000,
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'created_at' => now()->subDay(),
+        ]);
+
+        $order2->items()->create([
+            'medicine_id' => 2,
+            'quantity' => 1,
+            'unit_price' => 2000,
+            'subtotal' => 2000,
         ]);
     }
 }

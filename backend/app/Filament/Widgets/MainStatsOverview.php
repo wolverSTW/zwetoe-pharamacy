@@ -19,20 +19,25 @@ class MainStatsOverview extends BaseWidget
 
         return [
             Stat::make('Total Revenue', number_format($revenue) . ' MMK')
-                ->description('Total paid sales')
-                ->descriptionIcon('heroicon-m-banknotes')
+                ->description('Total consolidated sales')
+                ->descriptionIcon('heroicon-m-chart-bar')
                 ->chart([7, 10, 5, 12, 18, 14, 25])
                 ->color('success'),
 
             Stat::make('Pending Orders', Order::where('status', 'pending')->count())
-                ->description('Orders awaiting action')
+                ->description('Requires immediate review')
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('warning'),
 
             Stat::make('Active Customers', Customer::where('status', 'approved')->count())
-                ->description('Verified clients')
-                ->descriptionIcon('heroicon-m-users')
-                ->color('info'),
+                ->description('Verified accounts')
+                ->descriptionIcon('heroicon-m-user-group')
+                ->color('primary'),
+
+            Stat::make('Low Stock Alert', $lowStockCount = Medicine::where('stock_quantity', '<=', 5)->count())
+                ->description('Critical refill needed')
+                ->descriptionIcon('heroicon-m-exclamation-triangle')
+                ->color($lowStockCount > 0 ? 'danger' : 'success'),
         ];
     }
 }
