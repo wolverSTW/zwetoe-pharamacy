@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@gmail.com',
             'password' => bcrypt('password123'),
             'role' => 'admin',
+            'is_approve' => true,
         ]);
 
 
@@ -26,6 +27,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'staff@gmail.com',
             'password' => bcrypt('password123'),
             'role' => 'staff',
+            'is_approve' => true,
         ]);
 
         // Create Categories

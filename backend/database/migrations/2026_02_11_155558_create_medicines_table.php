@@ -18,10 +18,10 @@ return new class extends Migration
 
             $table->string('name'); // Medicine trade name
             $table->string('generic_name')->nullable(); // Scientific name
-            $table->string('sku')->unique(); // Stock Keeping Unit (Unique code)
+            $table->string('sku_code')->unique(); // Stock Keeping Unit (Unique code)
             
-            $table->decimal('buying_price', 10, 2); // Purchase price
-            $table->decimal('price', 10, 2); // Selling price
+            $table->decimal('buy_price', 10, 2); // Purchase price
+            $table->decimal('sell_price', 10, 2); // Selling price
             
             $table->integer('stock_quantity')->default(0); // Current stock level
             $table->date('expiry_date')->nullable(); // Medicine expiration date

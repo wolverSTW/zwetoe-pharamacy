@@ -34,14 +34,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const freshUserData = await authService.getCurrentUser();
           
           if (freshUserData) {
+            const actualUserData = freshUserData.user || freshUserData;
             setUser((prevUser: any) => {
-              const updatedUser = { ...prevUser, ...freshUserData };
+              const updatedUser = { ...prevUser, ...actualUserData };
               localStorage.setItem("user", JSON.stringify(updatedUser));
               return updatedUser;
             });
           }
-        } catch (error) {
-          console.error("Auth sync failed");
+        } catch (error: any) {
+          console.warn("Auth sync warning:", error.message || "Network issue");
+          // Only force logout if the server specifically rejects the token
+          if (error.status === 401 || error.response?.status === 401) {
+            console.error("Session expired - logging out");
+            logout();
+          }
         }
       }
       setLoading(false);
