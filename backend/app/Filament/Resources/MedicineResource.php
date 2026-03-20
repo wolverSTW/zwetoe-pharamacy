@@ -8,6 +8,10 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -79,16 +83,44 @@ class MedicineResource extends Resource
                     ->schema([
                         Forms\Components\FileUpload::make('image')
                             ->image()
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->directory(function (Get $get) {
+                            ->saveUploadedFileUsing(function (UploadedFile $file, Get $get): string {
+                                // 1. Determine Directory
                                 $categoryId = $get('category_id');
+                                $dir = 'medicines';
                                 if ($categoryId) {
                                     $category = \App\Models\Category::find($categoryId);
                                     if ($category && $category->slug) {
-                                        return "medicines/{$category->slug}";
+                                        $dir .= "/{$category->slug}";
                                     }
                                 }
-                                return 'medicines';
+
+                                // 2. Generate Clean WebP Filename
+                                $baseName = \Illuminate\Support\Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+                                $filename = $baseName . '.webp';
+                                $tempPath = tempnam(sys_get_temp_dir(), 'webp');
+
+                                // 3. Convert to WebP using Intervention Image
+                                try {
+                                    $manager = new ImageManager(new Driver());
+                                    $image = $manager->read($file->getRealPath());
+                                    
+                                    // 4. Encode to WebP and save to temp
+                                    $image->toWebp(80)->save($tempPath);
+                                } catch (\Throwable $e) {
+                                    // FALLBACK: If conversion fails, save original file with .webp extension (risky, but user wants it)
+                                    // Actually, better to just save original as original if it fails.
+                                    $ext = $file->getClientOriginalExtension();
+                                    $safeName = \Illuminate\Support\Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $ext;
+                                    return Storage::disk('public')->putFileAs($dir, $file, $safeName);
+                                }
+
+                                // 5. Store in Public Disk
+                                $storedPath = Storage::disk('public')->putFileAs($dir, new \Illuminate\Http\File($tempPath), $filename);
+                                
+                                // 6. Cleanup
+                                @unlink($tempPath);
+
+                                return $storedPath;
                             })
                             ->imageResizeMode('cover')
                             ->imageCropAspectRatio('1:1')
