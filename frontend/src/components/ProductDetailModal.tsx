@@ -35,7 +35,7 @@ export default function ProductDetailModal({ item, onClose }: any) {
     }
   };
 
-  const totalPrice = Math.floor(item.price) * quantity;
+  const totalPrice = Math.floor(item.sell_price || 0) * quantity;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
