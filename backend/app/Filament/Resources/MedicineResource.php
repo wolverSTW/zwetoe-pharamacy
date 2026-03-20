@@ -14,6 +14,9 @@ use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class MedicineResource extends Resource
 {
@@ -158,7 +161,8 @@ class MedicineResource extends Resource
                 Tables\Columns\TextColumn::make('category.name')
                     ->badge()
                     ->color('info')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('sell_price')
                     ->money('MMK')
@@ -173,12 +177,17 @@ class MedicineResource extends Resource
 
                 Tables\Columns\TextColumn::make('expiry_date')
                     ->date('d-M-Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category_id')
                     ->label('Filter by Category')
                     ->relationship('category', 'name'),
+                Filter::make('low_stock')
+                    ->label('Critical / Low Stock')
+                    ->query(fn (Builder $query): Builder => $query->where('stock_quantity', '<=', 10))
+                    ->indicator('Low Stock'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -187,6 +196,11 @@ class MedicineResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('toggle_availability')
+                        ->label('Toggle Availability')
+                        ->icon('heroicon-o-eye')
+                        ->action(fn (Collection $records) => $records->each(fn ($record) => $record->update(['is_active' => !$record->is_active])))
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }

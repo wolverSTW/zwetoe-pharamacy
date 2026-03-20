@@ -19,24 +19,27 @@ class MainStatsOverview extends BaseWidget
 
         return [
             Stat::make('Total Revenue', number_format($revenue) . ' MMK')
-                ->description('Total consolidated sales')
+                ->description('Consolidated Sales Performance')
                 ->descriptionIcon('heroicon-m-chart-bar')
-                ->chart([7, 10, 5, 12, 18, 14, 25])
+                ->chart([7, 10, 5, 12, 18, 14, 25, 20, 28, 32])
                 ->color('success'),
 
             Stat::make('Pending Orders', Order::where('status', 'pending')->count())
-                ->description('Requires immediate review')
+                ->description('Requires High-Priority Review')
                 ->descriptionIcon('heroicon-m-clock')
+                ->chart([3, 5, 2, 8, 4, 3, 6])
                 ->color('warning'),
 
-            Stat::make('Active Customers', Customer::where('status', 'approved')->count())
-                ->description('Verified accounts')
+            Stat::make('Approved Customers', Customer::where('status', 'approved')->count())
+                ->description('Verified Medical Partners')
                 ->descriptionIcon('heroicon-m-user-group')
+                ->chart([15, 18, 22, 25, 28, 32, 35])
                 ->color('primary'),
 
-            Stat::make('Low Stock Alert', $lowStockCount = Medicine::where('stock_quantity', '<=', 5)->count())
-                ->description('Critical refill needed')
+            Stat::make('Stock Criticality', $lowStockCount = Medicine::where('stock_quantity', '<=', 5)->count())
+                ->description($lowStockCount > 0 ? 'Urgent Inventory Refill Needed' : 'Inventory Levels Optimized')
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
+                ->chart([40, 35, 30, 25, 20, 15, 10, 5]) 
                 ->color($lowStockCount > 0 ? 'danger' : 'success'),
         ];
     }

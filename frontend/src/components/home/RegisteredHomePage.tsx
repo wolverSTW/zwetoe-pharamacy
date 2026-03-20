@@ -210,7 +210,7 @@ function ProductCard({ item, onSelect, onAddToCart }: any) {
       onClick={() => onSelect(item)}
       className="group bg-[#161b22] border border-white/5 rounded-3xl overflow-hidden hover:border-emerald-500/30 transition-all duration-500 cursor-pointer flex flex-col shadow-2xl"
     >
-      <div className="relative h-48 bg-white flex items-center justify-center p-12 overflow-hidden">
+      <div className="relative h-48 bg-white flex items-center justify-center p-5 overflow-hidden">
         <span className={`absolute top-4 right-4 text-[9px] font-black px-3 py-1.5 rounded-full z-10 tracking-widest uppercase
           ${item.stock_quantity > 0 ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
           {item.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'}
@@ -228,17 +228,14 @@ function ProductCard({ item, onSelect, onAddToCart }: any) {
       </div>
 
       <div className="p-6 flex flex-col flex-1">
-        <div className="flex items-center gap-2 mb-2 text-emerald-500/60 font-black text-[10px] uppercase tracking-widest">
-          <span className="w-1 h-1 rounded-full bg-emerald-500"></span>
-          {item.category?.name || "General"}
+        <div className="flex items-center gap-2 text-emerald-500/60 font-black text-[10px] uppercase tracking-widest min-h-[1rem]">
         </div>
 
         <h4 className="text-lg font-black text-white mb-1 tracking-tight truncate group-hover:text-emerald-500 transition-colors uppercase">{item.name}</h4>
-        <p className="text-[11px] text-gray-500 font-bold italic mb-6 truncate">{item.generic_name || "Technical Formula Pending"}</p>
 
         <div className="mt-auto flex items-center justify-between gap-4 pt-4 border-t border-white/5">
           <div className="flex flex-col">
-            <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest leading-none mb-1">Retail Value</span>
+            <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest leading-none mb-1">Price</span>
             <div className="flex items-baseline gap-1">
               <span className="text-xl font-black text-white">{Math.floor(item.sell_price || 0).toLocaleString()}</span>
               <span className="text-[11px] text-emerald-500 font-black">MMK</span>

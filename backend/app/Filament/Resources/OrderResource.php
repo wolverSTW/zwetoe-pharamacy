@@ -9,6 +9,10 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Illuminate\Database\Eloquent\Builder;
 
 class OrderResource extends Resource
 {
@@ -161,12 +165,32 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label('Total (MMK)')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Sum::make()->label('Total Revenue')),
 
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Date')
-                    ->dateTime()
-                    ->sortable(),
+                    ->label('Order Date')
+                    ->dateTime('d-M-Y H:i')
+                    ->sortable()
+                    ->toggleable(),
+            ])
+            ->filters([
+                Filter::make('created_at')
+                    ->form([
+                        DatePicker::make('created_from')->label('From Date'),
+                        DatePicker::make('created_until')->label('Until Date'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    })
             ])
             ->defaultSort('created_at', 'desc') 
             ->actions([

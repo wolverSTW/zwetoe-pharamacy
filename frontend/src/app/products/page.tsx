@@ -200,11 +200,7 @@ function ProductCard({ item, user, onSelect, onAddToCart }: any) {
       {/* Content Section from Image */}
       <div className="p-8 pt-6 flex flex-col flex-1">
         <div className="mb-8">
-          <p className="text-[10px] font-black text-emerald-500/80 uppercase tracking-widest mb-2">{item.category?.name || "Verified Medicine"}</p>
           <h4 className="text-xl font-black text-white tracking-tight uppercase leading-tight line-clamp-2 min-h-[3.5rem]">{item.name}</h4>
-          {!isGuest && (
-            <p className="text-[11px] text-gray-500 font-bold italic mt-2 truncate">{item.generic_name || "Technical Formula Verified"}</p>
-          )}
         </div>
         
         <div className="mt-auto pt-6 flex items-end justify-between border-t border-white/5">

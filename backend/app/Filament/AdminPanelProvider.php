@@ -9,6 +9,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -26,14 +27,18 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->brandName('ZweToe Authority')
             ->colors([
                 'primary' => Color::Emerald,
                 'danger' => Color::Rose,
                 'warning' => Color::Amber,
                 'info' => Color::Blue,
+                'gray' => Color::Slate,
             ])
             ->font('Inter')
             ->sidebarCollapsibleOnDesktop()
+            ->maxContentWidth(MaxWidth::Full)
+            ->databaseNotifications()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->spa()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
