@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Medicine extends Model
 {
+    use HasFactory;
     // Add all the fields we defined in the migration
     protected $fillable = [
         'category_id',

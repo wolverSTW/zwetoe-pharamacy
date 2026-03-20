@@ -11,14 +11,18 @@ class MedicineController extends Controller
     /**
      * Get a list of all medicines that are currently in stock.
      */
-    public function index()
+    public function index(Request $request)
     {
         // 1. Fetch medicines with their category information (Eager Loading)
         // 2. Filter only items in stock
-        $medicines = Medicine::with('category') 
-            ->where('stock_quantity', '>', 0)
-            ->latest()
-            ->get();
+        $query = Medicine::with('category') 
+            ->where('stock_quantity', '>', 0);
+
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        $medicines = $query->latest()->get();
 
         return response()->json([
             'status' => 'success',

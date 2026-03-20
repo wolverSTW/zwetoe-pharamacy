@@ -10,11 +10,19 @@ use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
+    private function checkAdmin()
+    {
+        if (!auth()->user() || auth()->user()->role !== 'admin') {
+            abort(403, 'Unauthorized.');
+        }
+    }
+
     /**
      * Get summary statistics for the Admin Dashboard
      */
     public function getDashboardStats()
     {
+        $this->checkAdmin();
         return response()->json([
             'status' => 'success',
             'data' => [
