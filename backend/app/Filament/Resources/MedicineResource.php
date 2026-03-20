@@ -6,6 +6,7 @@ use App\Filament\Resources\MedicineResource\Pages;
 use App\Models\Medicine;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -79,7 +80,16 @@ class MedicineResource extends Resource
                         Forms\Components\FileUpload::make('image')
                             ->image()
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->directory('medicines')
+                            ->directory(function (Get $get) {
+                                $categoryId = $get('category_id');
+                                if ($categoryId) {
+                                    $category = \App\Models\Category::find($categoryId);
+                                    if ($category && $category->slug) {
+                                        return "medicines/{$category->slug}";
+                                    }
+                                }
+                                return 'medicines';
+                            })
                             ->imageResizeMode('cover')
                             ->imageCropAspectRatio('1:1')
                             ->imageResizeTargetWidth('600')
@@ -104,7 +114,9 @@ class MedicineResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
+                    ->label('Thumbnail')
                     ->disk('public')
+                    ->visibility('public')
                     ->circular(),
 
                 Tables\Columns\TextColumn::make('name')
