@@ -43,8 +43,8 @@ export default function RegisteredHomePage({ user }: Props) {
         setMedicines(medData);
         setFilteredMedicines(medData);
         setCategories(catData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      } catch (error: any) {
+        console.error("Home Data Fetch Failure:", error.message || error);
       } finally {
         setLoading(false);
       }
@@ -87,26 +87,25 @@ export default function RegisteredHomePage({ user }: Props) {
   return (
     <main className="min-h-screen bg-[#0d1117] text-white pb-20 font-sans selection:bg-emerald-500/20">
       {/* Hero / Greeting Section */}
-      <section className="pt-16 pb-12 border-b border-white/5">
+      <section className="pt-5 pb-3 border-b border-white/5">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div className="space-y-2">
-              <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">
+              <h1 className="text-xl md:text-2xl font-black text-white tracking-tight">
                 {getGreeting()}, <span className="text-emerald-500">{displayName}</span>
               </h1>
-              <p className="text-gray-500 text-xs font-bold uppercase tracking-[0.3em] font-sans">Official Pharmacy Terminal</p>
             </div>
 
             <div className="w-full md:max-w-md relative group">
               <div className="absolute inset-y-0 left-4 flex items-center text-gray-500 group-focus-within:text-emerald-500 transition-colors">
                 <Icons.Search className="w-5 h-5" strokeWidth={2.5} />
               </div>
-              <input 
-                type="text" 
-                placeholder="Search Inventory..."
+              <input
+                type="text"
+                placeholder="Search....."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-[#161b22] border border-white/5 rounded-2xl py-4 pl-12 pr-6 text-sm font-bold text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-2xl"
+                className="w-full bg-[#161b22] border border-white/5 rounded-2xl py-2 pl-12 pr-6 text-sm font-bold text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-2xl"
               />
             </div>
           </div>
@@ -116,32 +115,21 @@ export default function RegisteredHomePage({ user }: Props) {
       {/* Sticky Professional Filter Bar - Removed and replaced with Dropdown below */}
 
       {/* Main Content Area */}
-      <section className="container mx-auto px-6 pt-16">
+      <section className="container mx-auto px-2 pt-16">
         <div className="flex items-center justify-between mb-12">
-          <div className="flex items-center gap-4">
-            <div className="w-1.5 h-8 bg-emerald-500 rounded-full"></div>
-            <div>
-              <h2 className="text-2xl font-black text-white tracking-tight uppercase">
-                {searchTerm ? "Search Matches" : (activeCategory === "All" ? "Current Collection" : activeCategory)}
-              </h2>
-              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">
-                Database Entry : {filteredMedicines.length} Verified Items
-              </p>
-            </div>
-          </div>
 
           <div className="flex items-center gap-4">
             {/* Professional Category Dropdown */}
             <div className="relative group">
-              <button 
+              <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-4 px-6 py-3 bg-[#161b22] border border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-widest text-emerald-500 hover:border-emerald-500/50 transition-all shadow-xl min-w-[240px] justify-between"
+                className="flex items-center gap-4 px-6 py-3 bg-[#161b22] border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-emerald-500 hover:border-emerald-500/50 transition-all shadow-xl min-w-[240px] justify-between"
               >
                 <div className="flex items-center gap-3">
                   <div className="text-emerald-500/80">
                     {activeCategory === "All" ? <Icons.LayoutGrid className="w-4 h-4" /> : getCategoryIcon(activeCategory)}
                   </div>
-                  <span>{activeCategory === "All" ? "All Departments" : activeCategory}</span>
+                  <span>{activeCategory === "All" ? "All Categories" : activeCategory}</span>
                 </div>
                 <Icons.ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -150,7 +138,7 @@ export default function RegisteredHomePage({ user }: Props) {
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)}></div>
                   <div className="absolute top-full left-0 right-0 mt-3 z-50 bg-[#1c2128] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-3xl animate-in fade-in slide-in-from-top-2 duration-200">
-                    <button 
+                    <button
                       onClick={() => { setActiveCategory("All"); setIsDropdownOpen(false); }}
                       className={`w-full text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 border-b border-white/5
                         ${activeCategory === "All" ? 'bg-emerald-500 text-[#0d1117]' : 'hover:bg-white/5 text-gray-400'}`}
@@ -160,10 +148,10 @@ export default function RegisteredHomePage({ user }: Props) {
                     </button>
                     <div className="max-h-[300px] overflow-y-auto no-scrollbar">
                       {categories.map((cat: any) => (
-                        <button 
+                        <button
                           key={cat.id}
                           onClick={() => { setActiveCategory(cat.name); setIsDropdownOpen(false); }}
-                          className={`w-full text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 border-b border-white/5 last:border-0
+                          className={`w-full text-left px-3 py-3 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 border-b border-white/5 last:border-0
                             ${activeCategory === cat.name ? 'bg-emerald-500 text-[#0d1117]' : 'hover:bg-white/5 text-gray-400'}`}
                         >
                           <div className={activeCategory === cat.name ? 'text-[#0d1117]' : 'text-emerald-500/50'}>
@@ -179,7 +167,7 @@ export default function RegisteredHomePage({ user }: Props) {
             </div>
 
             {(searchTerm || activeCategory !== "All") && (
-              <button 
+              <button
                 onClick={() => { setSearchTerm(""); setActiveCategory("All"); }}
                 className="w-12 h-12 flex items-center justify-center bg-[#161b22] border border-white/10 rounded-2xl text-emerald-500 hover:text-white hover:bg-emerald-500 transition-all shadow-xl group"
                 title="Reset Filters"
@@ -218,7 +206,7 @@ export default function RegisteredHomePage({ user }: Props) {
 
 function ProductCard({ item, onSelect, onAddToCart }: any) {
   return (
-    <div 
+    <div
       onClick={() => onSelect(item)}
       className="group bg-[#161b22] border border-white/5 rounded-3xl overflow-hidden hover:border-emerald-500/30 transition-all duration-500 cursor-pointer flex flex-col shadow-2xl"
     >
@@ -227,12 +215,12 @@ function ProductCard({ item, onSelect, onAddToCart }: any) {
           ${item.stock_quantity > 0 ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
           {item.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'}
         </span>
-        
+
         {item.image ? (
-          <img 
+          <img
             src={getImageUrl(item.image)}
-            className="max-h-full object-contain group-hover:scale-110 transition-transform duration-1000 ease-out" 
-            alt={item.name} 
+            className="max-h-full object-contain group-hover:scale-110 transition-transform duration-1000 ease-out"
+            alt={item.name}
           />
         ) : (
           <Icons.Pill className="w-12 h-12 text-gray-100" strokeWidth={1} />
@@ -241,13 +229,13 @@ function ProductCard({ item, onSelect, onAddToCart }: any) {
 
       <div className="p-6 flex flex-col flex-1">
         <div className="flex items-center gap-2 mb-2 text-emerald-500/60 font-black text-[10px] uppercase tracking-widest">
-           <span className="w-1 h-1 rounded-full bg-emerald-500"></span>
-           {item.category?.name || "General"}
+          <span className="w-1 h-1 rounded-full bg-emerald-500"></span>
+          {item.category?.name || "General"}
         </div>
-        
+
         <h4 className="text-lg font-black text-white mb-1 tracking-tight truncate group-hover:text-emerald-500 transition-colors uppercase">{item.name}</h4>
         <p className="text-[11px] text-gray-500 font-bold italic mb-6 truncate">{item.generic_name || "Technical Formula Pending"}</p>
-        
+
         <div className="mt-auto flex items-center justify-between gap-4 pt-4 border-t border-white/5">
           <div className="flex flex-col">
             <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest leading-none mb-1">Retail Value</span>
@@ -256,8 +244,8 @@ function ProductCard({ item, onSelect, onAddToCart }: any) {
               <span className="text-[11px] text-emerald-500 font-black">MMK</span>
             </div>
           </div>
-          
-          <button 
+
+          <button
             onClick={(e) => {
               e.stopPropagation();
               onAddToCart(item);

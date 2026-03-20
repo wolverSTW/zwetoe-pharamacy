@@ -10,11 +10,13 @@ export const medicineService = {
       const { data } = await axiosInstance.get("/medicines");
       return data.data || data; 
     } catch (error: any) {
-      console.error("Medicine Service Error Details:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
+      const errorDetails = {
+        message: error.message || "No message",
+        status: error.response?.status || "No Status",
+        data: error.response?.data || "No Data",
+        config: error.config?.url || "No Config URL"
+      };
+      console.error("Medicine Service Fatal Error:", errorDetails);
       throw error.response?.data || { message: error.message || "Failed to fetch medicines" };
     }
   },

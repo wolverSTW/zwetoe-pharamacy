@@ -205,7 +205,7 @@ export default function CartPage() {
                       </div>
                       <div>
                         <h4 className="font-bold text-sm text-white">{item.name}</h4>
-                        <p className="text-emerald-500 text-xs font-semibold">{item.price.toLocaleString()} MMK x {item.quantity}</p>
+                        <p className="text-emerald-500 text-xs font-semibold">{(item.sell_price || item.price || 0).toLocaleString()} MMK x {item.quantity}</p>
                       </div>
                     </div>
                     <button onClick={() => removeFromCart(item.id)} className="text-gray-500 hover:text-red-500 text-xs font-bold px-3 py-1 border border-[#1a1d23] rounded-md transition-all">Remove</button>
@@ -309,7 +309,7 @@ export default function CartPage() {
                     {purchasedItems.map((item: any) => (
                       <div key={item.id} className="flex justify-between text-xs font-bold">
                         <span className="flex-1 pr-4">{item.name} <span className="text-gray-400 ml-1">x{item.quantity}</span></span>
-                        <span>{(item.price * (item.quantity || 1)).toLocaleString()}</span>
+                        <span>{((item.sell_price || item.price || 0) * (item.quantity || 1)).toLocaleString()}</span>
                       </div>
                     ))}
                   </div>

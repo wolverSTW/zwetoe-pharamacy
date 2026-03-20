@@ -52,7 +52,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const totalAmount = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) => total + (item.sell_price || item.price || 0) * item.quantity,
     0
   );
 
