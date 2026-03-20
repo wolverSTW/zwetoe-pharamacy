@@ -15,14 +15,31 @@ use Illuminate\Database\Eloquent\Builder;
 class CustomerResource extends Resource
 {
     protected static ?string $model = Customer::class;
-    protected static ?string $navigationIcon = 'heroicon-o-identification';
-    // protected static ?string $navigationGroup = 'User Management';
+    protected static ?string $navigationIcon  = 'heroicon-o-identification';
+    protected static ?string $navigationGroup = 'User Management';
+    protected static ?string $navigationLabel = 'Customers';
+    protected static ?int    $navigationSort  = 1;
+
+    public static function getNavigationBadge(): ?string
+    {
+        $count = Customer::where('status', 'pending')->count();
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Pending customer approvals';
+    }
 
     public static function form(Form $form): Form
     {
         return $form->schema([
             Forms\Components\Grid::make(3)->schema([
-                // Left Column: Basic Info
                 Forms\Components\Section::make('Basic Information')
                     ->columnSpan(2)
                     ->schema([
@@ -33,16 +50,16 @@ class CustomerResource extends Resource
                             ->required(),
                         Forms\Components\TextInput::make('phone')
                             ->tel(),
-                        
+
                         Forms\Components\Select::make('status')
                             ->options([
-                                'pending' => 'Pending',
+                                'pending'  => 'Pending',
                                 'approved' => 'Approved',
                                 'rejected' => 'Rejected',
                             ])
                             ->required()
                             ->native(false)
-                            ->live(), // Status ပြောင်းတာနဲ့ rejection field တန်းပေါ်အောင်လို့ပါ
+                            ->live(),
 
                         Forms\Components\Textarea::make('reject_reason')
                             ->label('Reason for Rejection')
@@ -51,7 +68,6 @@ class CustomerResource extends Resource
                             ->columnSpanFull(),
                     ])->columns(2),
 
-                // Right Column: Profile Picture
                 Forms\Components\Section::make('Profile')
                     ->columnSpan(1)
                     ->schema([
@@ -61,16 +77,15 @@ class CustomerResource extends Resource
                             ->directory('customers'),
                     ]),
 
-                // Bottom: Address Section
                 Forms\Components\Section::make('Delivery Address')
-                    ->description('ဝယ်သူ၏ ပစ္စည်းပို့ဆောင်ရန် လိပ်စာအချက်အလက်')
+                    ->description('Customer shipping address details')
                     ->schema([
-                        Forms\Components\TextInput::make('region')->placeholder('တိုင်းဒေသကြီး'),
-                        Forms\Components\TextInput::make('township')->placeholder('မြို့နယ်'),
-                        Forms\Components\TextInput::make('town')->placeholder('မြို့'),
-                        Forms\Components\TextInput::make('street')->placeholder('လမ်းအမည်'),
+                        Forms\Components\TextInput::make('region')->placeholder('Region'),
+                        Forms\Components\TextInput::make('township')->placeholder('Township'),
+                        Forms\Components\TextInput::make('town')->placeholder('Town'),
+                        Forms\Components\TextInput::make('street')->placeholder('Street'),
                         Forms\Components\TextInput::make('house_number')
-                            ->placeholder('အိမ်အမှတ်')
+                            ->placeholder('House Number')
                             ->columnSpanFull(),
                     ])->columns(2)->collapsible(),
             ]),
@@ -83,41 +98,65 @@ class CustomerResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('avatar_url')
                     ->circular()
-                    ->label('Photo'),
-                
+                    ->size(40)
+                    ->label(''),
+
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable(),
-                
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                
-                // Filament v3 uses TextColumn with badge()
+                    ->sortable()
+                    ->weight('semibold')
+                    ->description(fn ($record): string => $record->email ?? ''),
+
+                Tables\Columns\TextColumn::make('phone')
+                    ->searchable()
+                    ->copyable()
+                    ->copyMessage('Phone copied!')
+                    ->icon('heroicon-m-phone')
+                    ->iconColor('gray'),
+
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'pending' => 'warning',
+                        'pending'  => 'warning',
                         'approved' => 'success',
                         'rejected' => 'danger',
-                        default => 'gray',
+                        default    => 'gray',
+                    })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'pending'  => 'heroicon-m-clock',
+                        'approved' => 'heroicon-m-check-circle',
+                        'rejected' => 'heroicon-m-x-circle',
+                        default    => 'heroicon-m-question-mark-circle',
                     }),
+
+                Tables\Columns\TextColumn::make('total_spent')
+                    ->label('Total Spent')
+                    ->formatStateUsing(fn ($state) => $state ? number_format($state) . ' MMK' : '—')
+                    ->color('success')
+                    ->weight('semibold')
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('full_address')
                     ->label('Address')
                     ->getStateUsing(function ($record) {
-                        $addressParts = array_filter([
-                            $record->house_number,
-                            $record->street,
-                            $record->township,
-                            $record->town,
-                            $record->region
+                        $parts = array_filter([
+                            $record->house_number, $record->street,
+                            $record->township, $record->town, $record->region,
                         ]);
-                        return count($addressParts) > 0 ? implode(', ', $addressParts) : 'No address set';
+                        return count($parts) > 0 ? implode(', ', $parts) : '—';
                     })
-                    ->limit(30),
+                    ->limit(30)
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'pending'  => 'Pending Verification',
+                        'approved' => 'Approved',
+                        'rejected' => 'Rejected',
+                    ]),
             ])
             ->actions([
-                // Quick Approve Action
                 Tables\Actions\Action::make('approve')
                     ->label('Approve')
                     ->icon('heroicon-m-check-circle')
@@ -132,7 +171,6 @@ class CustomerResource extends Resource
                             ->send();
                     }),
 
-                // Quick Reject Action
                 Tables\Actions\Action::make('reject')
                     ->label('Reject')
                     ->icon('heroicon-m-x-circle')
@@ -141,22 +179,24 @@ class CustomerResource extends Resource
                     ->form([
                         Forms\Components\Textarea::make('reject_reason')
                             ->required()
-                            ->label('Please provide a reason for rejection')
+                            ->label('Reason for rejection'),
                     ])
                     ->action(function (Customer $record, array $data) {
                         $record->update([
-                            'status' => 'rejected',
-                            'reject_reason' => $data['reject_reason']
+                            'status'        => 'rejected',
+                            'reject_reason' => $data['reject_reason'],
                         ]);
                         Notification::make()
                             ->title('Customer Rejected')
                             ->danger()
                             ->send();
                     }),
-                
+
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ]);
+            ])
+            ->emptyStateHeading('No Customers Yet')
+            ->emptyStateIcon('heroicon-o-users');
     }
 
     public static function getEloquentQuery(): Builder
@@ -169,9 +209,9 @@ class CustomerResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCustomers::route('/'),
+            'index'  => Pages\ListCustomers::route('/'),
             'create' => Pages\CreateCustomer::route('/create'),
-            'edit' => Pages\EditCustomer::route('/{record}/edit'),
+            'edit'   => Pages\EditCustomer::route('/{record}/edit'),
         ];
     }
 }

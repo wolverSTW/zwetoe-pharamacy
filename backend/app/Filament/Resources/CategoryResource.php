@@ -14,30 +14,25 @@ use Illuminate\Support\Str;
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
-
-    // Navigation configuration
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static ?string $navigationIcon  = 'heroicon-o-tag';
     protected static ?string $navigationGroup = 'Products Management';
+    protected static ?string $navigationLabel = 'Categories';
+    protected static ?int    $navigationSort  = 2;
 
-    /**
-     * Define the Form Schema for Create and Edit
-     */
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Section::make('Category Details')
                     ->schema([
-                        // Category Name with auto-slug generation
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) => 
+                            ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) =>
                                 $operation === 'create' ? $set('slug', Str::slug($state)) : null
                             ),
 
-                        // Slug field
                         Forms\Components\TextInput::make('slug')
                             ->required()
                             ->unique(Category::class, 'slug', ignoreRecord: true)
@@ -46,24 +41,32 @@ class CategoryResource extends Resource
             ]);
     }
 
-    /**
-     * Define the Table Columns for List View
-     */
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('semibold'),
 
                 Tables\Columns\TextColumn::make('slug')
                     ->fontFamily('mono')
-                    ->color('gray'),
+                    ->color('gray')
+                    ->size('sm'),
+
+                Tables\Columns\TextColumn::make('medicines_count')
+                    ->label('Medicines')
+                    ->counts('medicines')
+                    ->badge()
+                    ->color('info')
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime('d-M-Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->color('gray')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -76,7 +79,9 @@ class CategoryResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('No Categories Yet')
+            ->emptyStateIcon('heroicon-o-tag');
     }
 
     public static function getRelations(): array
@@ -84,15 +89,12 @@ class CategoryResource extends Resource
         return [];
     }
 
-    /**
-     * Define the default routes/pages
-     */
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCategories::route('/'),
+            'index'  => Pages\ListCategories::route('/'),
             'create' => Pages\CreateCategory::route('/create'),
-            'edit' => Pages\EditCategory::route('/{record}/edit'),
+            'edit'   => Pages\EditCategory::route('/{record}/edit'),
         ];
     }
 }

@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -28,19 +29,33 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('ZweToe Authority')
+            ->brandLogo(fn () => view('filament.brand'))
             ->colors([
-                'primary' => Color::Emerald,
-                'danger' => Color::Rose,
-                'warning' => Color::Amber,
-                'info' => Color::Blue,
-                'gray' => Color::Slate,
+                'primary'  => Color::Emerald,
+                'danger'   => Color::Rose,
+                'warning'  => Color::Amber,
+                'success'  => Color::Emerald,
+                'info'     => Color::Sky,
+                'gray'     => Color::Slate,
             ])
             ->font('Inter')
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth(MaxWidth::Full)
+            ->darkMode(false)
             ->databaseNotifications()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->spa()
+            ->navigationGroups([
+                NavigationGroup::make('Sales & Orders')
+                    ->icon('heroicon-o-shopping-bag')
+                    ->collapsible(false),
+                NavigationGroup::make('Products Management')
+                    ->icon('heroicon-o-beaker')
+                    ->collapsible(false),
+                NavigationGroup::make('User Management')
+                    ->icon('heroicon-o-users')
+                    ->collapsible(false),
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

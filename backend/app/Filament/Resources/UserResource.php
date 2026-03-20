@@ -14,9 +14,10 @@ use Illuminate\Database\Eloquent\Builder;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-users';
-    // protected static ?string $navigationGroup = 'User Management';
+    protected static ?string $navigationIcon  = 'heroicon-o-users';
+    protected static ?string $navigationGroup = 'User Management';
+    protected static ?string $navigationLabel = 'Staff & Admins';
+    protected static ?int    $navigationSort  = 2;
 
     public static function getGloballySearchableAttributes(): array
     {
@@ -40,7 +41,6 @@ class UserResource extends Resource
                                     ->imageEditor(),
                             ]),
 
-
                         Forms\Components\Section::make('User Account Details')
                             ->description('Manage user credentials and access levels.')
                             ->columnSpan(2)
@@ -54,9 +54,7 @@ class UserResource extends Resource
                                     ->required()
                                     ->unique(ignoreRecord: true)
                                     ->autocomplete('none')
-                                    ->extraAttributes([
-                                        'autocomplete' => 'new-password',
-                                    ]),
+                                    ->extraAttributes(['autocomplete' => 'new-password']),
 
                                 Forms\Components\TextInput::make('phone')
                                     ->label('Phone Number')
@@ -73,7 +71,7 @@ class UserResource extends Resource
 
                                 Forms\Components\TextInput::make('password')
                                     ->password()
-                                    ->revealable() 
+                                    ->revealable()
                                     ->dehydrated(fn ($state) => filled($state))
                                     ->autocomplete('new-password')
                                     ->required(fn (string $context): bool => $context === 'create'),
@@ -93,31 +91,38 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('avatar_url')
                     ->label('')
-                    ->circular(),
+                    ->circular()
+                    ->size(40),
 
                 Tables\Columns\TextColumn::make('name')
                     ->label('User Information')
                     ->searchable()
                     ->sortable()
+                    ->weight('semibold')
                     ->description(fn (User $record): string => $record->email),
 
-                Tables\Columns\BadgeColumn::make('role')
-                    ->colors([
-                        'danger' => User::ROLE_ADMIN,
-                        'warning' => User::ROLE_STAFF,
-                        'success' => User::ROLE_CUSTOMER,
-                    ])
+                // Fixed: using TextColumn->badge() instead of deprecated BadgeColumn
+                Tables\Columns\TextColumn::make('role')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        User::ROLE_ADMIN => 'danger',
+                        User::ROLE_STAFF => 'warning',
+                        default          => 'gray',
+                    })
                     ->icon(fn (string $state): string => match ($state) {
                         User::ROLE_ADMIN => 'heroicon-m-shield-check',
                         User::ROLE_STAFF => 'heroicon-m-user-group',
-                        default => 'heroicon-m-user',
+                        default          => 'heroicon-m-user',
                     })
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Phone')
                     ->searchable()
-                    ->copyable(),
+                    ->copyable()
+                    ->copyMessage('Phone copied!')
+                    ->icon('heroicon-m-phone')
+                    ->iconColor('gray'),
 
                 Tables\Columns\TextColumn::make('is_approve')
                     ->label('Status')
@@ -129,6 +134,7 @@ class UserResource extends Resource
                     ->label('Joined')
                     ->dateTime('M d, Y')
                     ->sortable()
+                    ->color('gray')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
@@ -156,9 +162,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
+            'index'  => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'edit'   => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }
