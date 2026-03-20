@@ -54,13 +54,13 @@ class OrderController extends Controller
                         throw new \Exception("Insufficient stock for " . ($medicine->name ?? 'Medicine'));
                     }
 
-                    $subtotal = $medicine->price * $item['quantity'];
+                    $subtotal = $medicine->sell_price * $item['quantity'];
                     $totalAmount += $subtotal;
 
                     $order->items()->create([
                         'medicine_id' => $item['medicine_id'],
                         'quantity' => $item['quantity'],
-                        'unit_price' => $medicine->price,
+                        'unit_price' => $medicine->sell_price,
                         'subtotal' => $subtotal,
                     ]);
 
@@ -77,6 +77,7 @@ class OrderController extends Controller
                 return response()->json([
                     'message' => 'Order placed successfully!',
                     'order_id' => $order->id,
+                    'invoice_number' => $order->invoice_number,
                     'grand_total' => $totalAmount,
                 ], 201);
             });

@@ -25,3 +25,51 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* --- Global Print Hygiene --- */
+@media print {
+  .no-print, 
+  nav, 
+  header, 
+  footer, 
+  #chatbot-container, 
+  .chatbot,
+  [class*="AIChatbot"],
+  div[class*="AIChatbot"],
+  svg[class*="AIChatbot"],
+  iframe,
+  .toaster,
+  #hot-toast-container,
+  button:not(.print-allow) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+
+  /* Force background to white for every ancestor of the printable area */
+  body, html, main, .fixed, .absolute, .relative, div {
+     background-color: transparent !important;
+     background-image: none !important;
+     box-shadow: none !important;
+     border-color: transparent !important;
+  }
+
+  body, html {
+    background: white !important;
+    color: black !important;
+    width: 21cm !important;
+    height: 29.7cm !important;
+    overflow: hidden !important;
+  }
+
+  /* Specifically isolate the invoice */
+  #invoice-print-area {
+    background: white !important;
+    visibility: visible !important;
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 99999 !important;
+  }
+}

@@ -69,7 +69,7 @@ export default function AIChatbot() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-9999 font-sans selection:bg-emerald-500/30 text-white">
+    <div className="fixed bottom-6 right-6 z-9999 font-sans selection:bg-emerald-500/30 text-white no-print">
       {/* Floating Toggle Button */}
      <button 
       onClick={() => setIsOpen(!isOpen)}
