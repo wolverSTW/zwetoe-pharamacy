@@ -54,7 +54,7 @@ export default function CartPage() {
 
     setFinalTotal(totalAmount);
     setPurchasedItems([...cart]);
-    setQrImage("/images/qr/kbz-pay-qr.jpg"); 
+    setQrImage(`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}/images/qr/kbz-pay-qr.jpg`); 
     setModalView("payment");
     setShowQRModal(true);
   };
@@ -284,7 +284,7 @@ export default function CartPage() {
                 <div className="bg-white p-10 md:p-16 flex flex-col items-center justify-center md:w-1/2">
                    <p className="text-xs font-bold text-blue-600 tracking-widest pb-4 uppercase">Step 2: Scan with KBZPay</p>
                    <div className="w-full max-w-70 aspect-square border-4 border-gray-100 p-2 rounded-xl">
-                      <img src={qrImage || "/images/qr/kbz-pay-qr.jpg"} alt="QR" className="w-full h-full object-contain" />
+                      <img src={qrImage || `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}/images/qr/kbz-pay-qr.jpg`} alt="QR" className="w-full h-full object-contain" />
                    </div>
                    <div className="mt-8 text-center text-black">
                       <p className="text-sm font-black tracking-widest uppercase">Zwe Toe Pharmacy</p>
@@ -318,7 +318,12 @@ export default function CartPage() {
                     <span className="text-2xl">{finalTotal.toLocaleString()} MMK</span>
                   </div>
                 </div>
-                <button onClick={() => window.print()} className="mt-6 px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-bold uppercase transition-all no-print">Print Receipt</button>
+                <button onClick={() => {
+                  const originalTitle = document.title;
+                  document.title = "zwetoe_invoice";
+                  window.print();
+                  document.title = originalTitle;
+                }} className="mt-6 px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-bold uppercase transition-all no-print">Print Receipt</button>
               </div>
             ) : (
               <div className="flex-1 p-12 md:p-24 flex flex-col items-center justify-center text-center space-y-6 bg-[#0f1115]">
