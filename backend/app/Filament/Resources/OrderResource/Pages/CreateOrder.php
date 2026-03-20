@@ -12,6 +12,11 @@ class CreateOrder extends CreateRecord
 {
     protected static string $resource = OrderResource::class;
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     /**
      * Triggered after the Order record is successfully created in the database.
      */
@@ -35,10 +40,5 @@ class CreateOrder extends CreateRecord
                 $customer->increment('total_spent', $order->total_amount);
             }
         });
-    }
-
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
     }
 }

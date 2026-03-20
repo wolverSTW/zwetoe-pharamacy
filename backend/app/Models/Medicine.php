@@ -12,9 +12,9 @@ class Medicine extends Model
         'category_id',
         'name',
         'generic_name',
-        'sku',
-        'buying_price',
-        'price',
+        'sku_code',
+        'buy_price',
+        'sell_price',
         'stock_quantity',
         'expiry_date',
         'image',
@@ -26,8 +26,15 @@ class Medicine extends Model
         return $this->belongsTo(Category::class);
     }
 
-    protected $appends = ['full_image_url'];
-    public function getFullImageUrlAttribute() {
-    return $this->image ? asset('storage/' . str_replace('\\', '/', $this->image)) : null;
-}
+    protected $appends = ['image_url', 'full_image_url'];
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image ? asset('storage/' . str_replace('\\', '/', $this->image)) : null;
+    }
+
+    public function getFullImageUrlAttribute()
+    {
+        return $this->image ? asset('storage/' . str_replace('\\', '/', $this->image)) : null;
+    }
 }

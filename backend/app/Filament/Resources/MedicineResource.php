@@ -43,7 +43,7 @@ class MedicineResource extends Resource
                             ->label('Generic (Scientific) Name')
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('sku')
+                        Forms\Components\TextInput::make('sku_code')
                             ->label('SKU / Medicine Code')
                             ->unique(ignoreRecord: true)
                             ->required(),
@@ -52,12 +52,12 @@ class MedicineResource extends Resource
                 // Section 2: Pricing and Inventory
                 Forms\Components\Section::make('Pricing & Inventory')
                     ->schema([
-                        Forms\Components\TextInput::make('buying_price')
+                        Forms\Components\TextInput::make('buy_price')
                             ->numeric()
                             ->prefix('MMK')
                             ->required(),
 
-                        Forms\Components\TextInput::make('price')
+                        Forms\Components\TextInput::make('sell_price')
                             ->label('Selling Price')
                             ->numeric()
                             ->prefix('MMK')
@@ -117,7 +117,7 @@ class MedicineResource extends Resource
                     ->color('info')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('price')
+                Tables\Columns\TextColumn::make('sell_price')
                     ->money('MMK')
                     ->sortable(),
 

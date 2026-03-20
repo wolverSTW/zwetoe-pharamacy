@@ -10,16 +10,16 @@ class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected function getSavedNotification(): ?Notification
     {
         return Notification::make()
             ->success()
             ->title('User Updated')
             ->body('The user details have been updated successfully.');
-    }
-
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
     }
 }
