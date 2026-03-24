@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Filament\Widgets;
+
+use App\Models\Order;
+use App\Models\Medicine;
+use App\Models\Customer;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+
+class MainStatsOverview extends BaseWidget
+{
+    protected static ?int $sort = 1;
+    protected static ?string $pollingInterval = '15s'; // Auto-refresh every 15s
+
+    protected function getStats(): array
+    {
+        $revenue = Order::where('payment_status', 'paid')->sum('total_amount');
+
+        return [
+            Stat::make('Total Revenue', number_format($revenue) . ' MMK')
+                ->description('Total paid sales')
+                ->descriptionIcon('heroicon-m-banknotes')
+                ->chart([7, 10, 5, 12, 18, 14, 25])
+                ->color('success'),
+
+            Stat::make('Pending Orders', Order::where('status', 'pending')->count())
+                ->description('Orders awaiting action')
+                ->descriptionIcon('heroicon-m-clock')
+                ->color('warning'),
+
+            Stat::make('Active Customers', Customer::where('status', 'approved')->count())
+                ->description('Verified clients')
+                ->descriptionIcon('heroicon-m-users')
+                ->color('info'),
+        ];
+    }
+}
