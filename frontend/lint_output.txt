@@ -1,0 +1,145 @@
+
+> frontend@0.1.0 lint
+> eslint
+
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\__tests__\CartContext.test.tsx
+  15:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\app\about\page.tsx
+  13:9  warning  'values' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\app\api\chat\route.ts
+  38:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\app\cart\page.tsx
+   26:52   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   36:56   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   85:40   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  109:21   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  182:209  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  202:34   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  206:43   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  290:23   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  342:52   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\app\login\page.tsx
+   45:19  error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  139:16  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\app\page.tsx
+   6:8   warning  'Navbar' is defined but never used                 @typescript-eslint/no-unused-vars
+   9:36  error    Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  29:9   warning  'handleLogout' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\app\products\page.tsx
+    4:8   warning  'Link' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+   21:60  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   22:36  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   52:34  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   55:34  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   63:28  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  126:35  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  148:41  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  174:61  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  190:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\components\AIChatbot.tsx
+  64:14  warning  'err' is defined but never used           @typescript-eslint/no-unused-vars
+  64:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\components\ProductDetailModal.tsx
+   9:80  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  61:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\components\home\RegisteredHomePage.tsx
+   13:9   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   25:60  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   46:23  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   58:34  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   61:34  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   69:28  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  150:45  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  183:43  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  207:55  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  220:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\context\AuthContext.tsx
+   6:9   error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   9:24  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  16:36  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  38:32  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  44:25  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  49:13  error  Error: Cannot access variable before it is declared
+
+`logout` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\context\AuthContext.tsx:49:13
+  47 |           if (error.status === 401 || error.response?.status === 401) {
+  48 |             console.error("Session expired - logging out");
+> 49 |             logout();
+     |             ^^^^^^ `logout` accessed before it is declared
+  50 |           }
+  51 |         }
+  52 |       }
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\context\AuthContext.tsx:68:3
+  66 |   };
+  67 |
+> 68 |   const logout = () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^
+> 69 |     localStorage.removeItem("token");
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 70 |     localStorage.removeItem("user");
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 71 |     setUser(null);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 72 |     setToken(null);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 73 |     window.location.href = "/";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 74 |   };
+     | ^^^^^ `logout` is declared here
+  75 |
+  76 |   return (
+  77 |     <AuthContext.Provider value={{ user, token, loading, login, logout }}>  react-hooks/immutability
+  59:37  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\context\CartContext.tsx
+   5:35  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-explicit-any
+   8:36  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-explicit-any
+  15:9   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\context\CartContext.tsx:15:9
+  13 |     if (savedCart) {
+  14 |       try {
+> 15 |         setCart(JSON.parse(savedCart));
+     |         ^^^^^^^ Avoid calling setState() directly within an effect
+  16 |       } catch (e) {
+  17 |         console.error("Failed to parse cart", e);
+  18 |       }  react-hooks/set-state-in-effect
+  27:31  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-explicit-any
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\services\authService.ts
+   5:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   9:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  15:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  22:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\services\categoryService.ts
+  8:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\xampp\htdocs\zwetoe-pharamacy\frontend\src\services\medicineService.ts
+  12:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  29:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  39:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 61 problems (51 errors, 10 warnings)
+

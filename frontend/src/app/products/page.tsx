@@ -5,7 +5,7 @@ import Link from "next/link";
 import { medicineService } from "@/services/medicineService";
 import { categoryService } from "@/services/categoryService";
 import { getImageUrl } from "@/utils/imageHelper";
-import ProductDetailModal from "@/components/ProductDetailModal";
+import ProductDetailModal from "@/components/ui/ProductDetailModal";
 import { useCart } from "@/context/CartContext";
 import toast from "react-hot-toast";
 import * as Icons from "lucide-react";

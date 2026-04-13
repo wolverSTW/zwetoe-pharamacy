@@ -18,6 +18,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
 
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    setToken(null);
+    window.location.href = "/";
+  };
+
   useEffect(() => {
     const initAuth = async () => {
       const savedToken = localStorage.getItem("token");
@@ -65,13 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem("user", JSON.stringify(userData));
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-    setToken(null);
-    window.location.href = "/";
-  };
+
 
   return (
     <AuthContext.Provider value={{ user, token, loading, login, logout }}>

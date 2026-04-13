@@ -16,6 +16,7 @@ class MedicineController extends Controller
         // 1. Fetch medicines with their category information (Eager Loading)
         // 2. Filter only items in stock
         $query = Medicine::with('category') 
+            ->select('id', 'category_id', 'name', 'generic_name', 'sell_price', 'stock_quantity', 'image')
             ->where('stock_quantity', '>', 0);
 
         if ($request->has('category_id')) {

@@ -11,12 +11,13 @@ export const medicineService = {
       return data.data || data; 
     } catch (error: any) {
       const errorDetails = {
-        message: error.message || "No message",
+        message: error.message || "Timeout / Network Request Failed",
+        code: error.code || "No Error Code",
         status: error.response?.status || "No Status",
-        data: error.response?.data || "No Data",
-        config: error.config?.url || "No Config URL"
+        url: error.config?.url || "Unknown URL"
       };
-      console.error("Medicine Service Fatal Error:", errorDetails);
+      
+      console.error("Medicine Service Fatal Error:", JSON.stringify(errorDetails, null, 2));
       throw error.response?.data || { message: error.message || "Failed to fetch medicines" };
     }
   },

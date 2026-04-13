@@ -39,6 +39,7 @@ class AdminController extends Controller
      */
     public function listCustomers(Request $request)
     {
+        $this->checkAdmin();
         $status = $request->query('status'); // e.g., ?status=pending
         
         $query = Customer::latest();
@@ -58,6 +59,7 @@ class AdminController extends Controller
      */
     public function updateCustomerStatus(Request $request, $id)
     {
+        $this->checkAdmin();
         $request->validate([
             'status' => 'required|in:active,pending,suspended',
         ]);
@@ -84,6 +86,7 @@ class AdminController extends Controller
      */
     public function deleteCustomer($id)
     {
+        $this->checkAdmin();
         $customer = Customer::find($id);
         
         if ($customer) {

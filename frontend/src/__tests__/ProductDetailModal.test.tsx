@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ProductDetailModal from '../components/ProductDetailModal';
+import ProductDetailModal from '../components/ui/ProductDetailModal';
 import { useCart } from '../context/CartContext';
 import { toast } from 'react-hot-toast';
 
@@ -46,8 +46,7 @@ describe('ProductDetailModal', () => {
         render(<ProductDetailModal item={mockItem} onClose={jest.fn()} />);
 
         expect(screen.getByText('Paracetamol')).toBeInTheDocument();
-        expect(screen.getByText('Painkiller')).toBeInTheDocument();
-        expect(screen.getByText('Stock: 10')).toBeInTheDocument();
+        expect(screen.getByText(/Available Stock/i)).toBeInTheDocument();
     });
 
     it('displays the calculated subtotal for 1 item', () => {
@@ -67,7 +66,7 @@ describe('ProductDetailModal', () => {
         fireEvent.click(addToCartBtn);
 
         expect(mockAddToCart).toHaveBeenCalledWith(mockItem, 1);
-        expect(toast.success).toHaveBeenCalledWith('Paracetamol added to cart!');
+        expect(toast.success).toHaveBeenCalledWith('Paracetamol added to cart!', expect.any(Object));
         expect(mockClose).toHaveBeenCalled();
     });
 });

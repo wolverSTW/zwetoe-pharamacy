@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import GuestHomePage from "@/components/home/GuestHomePage";
-import RegisteredHomePage from "@/components/home/RegisteredHomePage";
-import Navbar from "@/components/Navbar"; 
+import GuestHomePage from "@/components/features/home/GuestHomePage";
+import RegisteredHomePage from "@/components/features/home/RegisteredHomePage";
+import Navbar from "@/components/layout/Navbar"; 
 
 export default function HomePage() {
   const [user, setUser] = useState<any>(null);

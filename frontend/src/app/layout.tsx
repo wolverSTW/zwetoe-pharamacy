@@ -3,9 +3,9 @@
 import { usePathname } from "next/navigation";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/layout/Navbar";
 import { CartProvider } from "../context/CartContext";
-import AIChatbot from "@/components/AIChatbot";
+import AIChatbot from "@/components/ui/AIChatbot";
 import "./globals.css";
 
 export default function RootLayout({

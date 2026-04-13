@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { medicineService } from "@/services/medicineService";
 import { categoryService } from "@/services/categoryService";
-import ProductDetailModal from "@/components/ProductDetailModal";
+import ProductDetailModal from "@/components/ui/ProductDetailModal";
 import { useCart } from "@/context/CartContext";
 import toast from "react-hot-toast";
 import { getImageUrl } from "@/utils/imageHelper";
@@ -36,10 +36,10 @@ export default function RegisteredHomePage({ user }: Props) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [medData, catData] = await Promise.all([
-          medicineService.getAll(),
-          categoryService.getAll()
-        ]);
+        // Fetch sequentially to avoid overwhelming single-threaded php artisan serve
+        const medData = await medicineService.getAll();
+        const catData = await categoryService.getAll();
+        
         setMedicines(medData);
         setFilteredMedicines(medData);
         setCategories(catData);
