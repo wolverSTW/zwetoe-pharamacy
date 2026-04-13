@@ -242,17 +242,17 @@ graph LR
 
 ---
 
-### 1.6 Management of Technical Challenges
-The implementation of a decoupled system required solving several technical hurdles related to security and data synchronization [13], [14]:
+### 1.6 Challenges and Solutions
+The implementation of a decoupled system required solving several critical technical hurdles related to security, state management, and data synchronization across different domains [13], [14]:
 
-1.  **Cross-Domain Authentication**: Secure login states between the separate frontend and backend segments were achieved using **Laravel Sanctum**. This implementation ensures that authentication cookies are shared securely without compromising CSRF protection [2], [11].
-2.  **Asset Resolution**: Managing product images in a headless environment required localized resolution logic. A model-level rule was implemented in the backend to append the application URL to image paths, ensuring absolute paths are always delivered to the frontend [14].
-3.  **Data Consistency**: The risk of showing outdated stock levels was mitigated using **SWR**. This tool enables background data revalidation, ensuring the UI remains synchronized with the database without impacting performance [9].
+1.  **State Synchronization and React Hydration**: A primary challenge involved maintaining a consistent shopping cart state during page reloads in a server-rendered environment. Since Next.js utilizes Server Components, mismatches can occur if the server state differs from the client’s local storage. This "Hydration Error" was resolved by implementing a dedicated `useEffect` hook to ensure that the client-side cart logic only executes after the component has safely mounted in the browser [9].
+2.  **Cross-Domain Security and CORS**: Establishing secure communication between the Next.js frontend (Client) and the Laravel API (Server) required precise configuration of Cross-Origin Resource Sharing (CORS) policies. To prevent unauthorized data interception, **Laravel Sanctum** was configured to utilize stateful cookie-based authentication. This ensures that only trusted domains can request sensitive medicine data while maintaining full CSRF protection [2], [11].
+3.  **Dynamic Asset Resolution**: In a "Headless" setup, images stored on the backend server cannot be accessed via relative paths by the frontend. To solve this, a model-level accessor was implemented in the Laravel backend. This logic automatically prepends the current application URL to every medicine image path, ensuring that absolute URLs are delivered to the frontend for near-instant rendering [14].
 
 ---
 
-### 1.7 Task 1 Summary
-The overall ZweToe Pharmacy infrastructure provides a professional foundation for modern pharmaceutical retail. The decoupling of internal operations from the customer interface ensures a system that is fast, secure, and ready for future integrations [9].
+### 1.7 Conclusion
+The ZweToe Pharmacy infrastructure provides a professional foundation for modern pharmaceutical retail. By successfully decoupling internal inventory operations from the customer interface, a system has been established that is fast, secure, and ready for future integrations [9]. The project achieves its primary objective of eliminating inventory discrepancies while providing staff with a powerful, real-time management dashboard. This architecture ensures that the business can scale efficiently without compromising the security of patient and medication data.
 
 ---
 
