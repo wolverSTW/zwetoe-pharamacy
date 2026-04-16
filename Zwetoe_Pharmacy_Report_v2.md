@@ -256,9 +256,9 @@ The ZweToe Pharmacy infrastructure provides a professional foundation for modern
 
 ---
 
-## Task 2: Testing, Security, and Evaluation
+## Task 2: Testing and Discussion
 
-### 2.1 Quality Assurance Strategy
+### 2.1 Testing
 Accuracy is a critical requirement in pharmaceutical systems to prevent medication errors. A multi-layered testing strategy was implemented to verify every calculation and stock adjustment [6], [13].
 
 **Figure 9: Testing Hierarchy**
@@ -277,13 +277,13 @@ graph BT
 
 ---
 
-### 2.2 Verification Tools
+### 2.2 Testing Tools
 - **Backend Infrastructure**: **PHPUnit** and **Pest** provided the framework for verifying database integrity and API response accuracy [11].
 - **Frontend Presentation**: **Jest** and **React Testing Library** were utilized to ensure UI stability and component accuracy across various states [9].
 
 ---
 
-### 2.3 Quantitative Results
+### 2.3 Test Results
 Testing of both environments resulted in a 100% pass rate, providing objective evidence of system stability and functional accuracy.
 
 #### 2.3.1 Backend Verification Data
@@ -336,7 +336,7 @@ The frontend suite verified that the UI remains stable even during simulated net
 
 ---
 
-### 2.4 Discussion and Evaluation
+### 2.4 Discussion
 The implementation of ZweToe Pharmacy serves as a successful case study for the application of "Headless" MACH architecture in regulated retail environments [12]. The strategic decoupling of the inventory engine from the user interface results in a balanced system that prioritizes both data integrity and user engagement [6].
 
 #### 2.4.1 Performance Analysis
