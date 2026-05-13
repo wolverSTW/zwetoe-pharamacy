@@ -1,103 +1,122 @@
-# ZweToe Pharmacy - Full-Stack Ecommerce & Management
+# ZweToe Pharmacy — Full-Stack E-Commerce & Management System
 
-Full-stack pharmacy POS, inventory, and ecommerce platform with Laravel 11 (API + Filament admin) and Next.js 16 storefront.
+## Overview
 
-## At a Glance
+ZweToe Pharmacy is a full-stack pharmacy management and e-commerce platform developed as part of an academic project. The system integrates a **Laravel 11** RESTful API with a **Filament v3** administrative panel on the backend and a **Next.js 16** consumer-facing storefront on the frontend. It provides end-to-end support for inventory management, point-of-sale operations, role-based access control, and online ordering.
 
-- Backend: Laravel 11, Sanctum auth, Filament v3 admin, custom enum-based RBAC, queues.
-- Frontend: Next.js 16 (App Router), React 19, Tailwind 4, axios client.
-- Database: SQLite for local; MySQL 8.0 for staging/production (optional).
+## Technology Stack
 
-## 🏗️ Application Architecture
+| Layer       | Technology                                                        |
+|-------------|-------------------------------------------------------------------|
+| Backend     | Laravel 11, Laravel Sanctum, Filament v3, Enum-based RBAC, Queues |
+| Frontend    | Next.js 16 (App Router), React 19, Tailwind CSS 4, Axios          |
+| Database    | SQLite (development), MySQL 8.0 (staging/production)               |
+| Testing     | PHPUnit (backend), Jest (frontend)                                 |
 
-The project is organized into a headless backend and a decoupled frontend to ensure scalability and maintainability.
+## Application Architecture
 
-### ⚙️ Backend Architecture (Laravel 11 API)
-Located in `/backend`, this service manages the core API, database, and the Filament-powered administrative panel.
+The system adopts a **headless architecture**, decoupling the backend API from the frontend client to maximise scalability, maintainability, and independent deployability.
 
-- **`app/`** — Contains the core domain logic, Eloquent models, API Controllers, and Filament resources.
-- **`database/`** — Houses all database migrations, factories, and initial state seeders.
-- **`routes/`** — Defines the REST API endpoints (`api.php`) and web routes.
-- **`tests/`** — Contains automated feature and unit tests to ensure application stability.
-- **`storage/`** — Stores application logs, compiled templates, and user-uploaded media.
+### Backend Service (Laravel 11 API)
 
-### 💻 Frontend Architecture (Next.js 16)
-Located in `/frontend`, this directory contains the high-performance Next.js storefront for consumers.
+Located in the `/backend` directory, the backend service is responsible for the core business logic, data persistence, and the Filament-powered administrative interface.
 
-- **`src/app/`** — Implements the Next.js App Router for all public and authenticated pages.
-- **`src/lib/`** — Contains the configured Axios API client, authentication logic, and generic utilities.
-- **`public/`** — Stores static frontend assets such as images and fonts.
+| Directory      | Purpose                                                                  |
+|----------------|--------------------------------------------------------------------------|
+| `app/`         | Core domain logic, Eloquent models, API controllers, and Filament resources |
+| `database/`    | Database migrations, model factories, and initial state seeders           |
+| `routes/`      | REST API endpoint definitions (`api.php`) and web route configuration     |
+| `tests/`       | Automated feature and unit tests for application stability verification   |
+| `storage/`     | Application logs, compiled templates, and user-uploaded media             |
 
-### 📚 Project Documentation
-- **`README.md`** — The primary onboarding and setup guide.
-- **`erd.md`** — Entity-Relationship Diagram outlining the database schema.
+### Frontend Client (Next.js 16)
 
-## 📅 Development Timeline
+Located in the `/frontend` directory, the frontend client delivers a high-performance consumer storefront.
 
-The application was purposefully built through the following milestone phases:
+| Directory      | Purpose                                                                  |
+|----------------|--------------------------------------------------------------------------|
+| `src/app/`     | Next.js App Router implementation for public and authenticated pages      |
+| `src/lib/`     | Configured Axios API client, authentication logic, and shared utilities   |
+| `public/`      | Static assets including images and fonts                                  |
 
-- **Mar 01** — Baseline Setup: Initial repository structure for Next.js and Laravel.
-- **Mar 03** — Core Database: Designed schema and defined Eloquent models.
-- **Mar 05** — API Authentication: Implemented Sanctum authentication and AuthController.
-- **Mar 07** — Security layer: Built custom RBAC for Admin and Customer roles.
-- **Mar 09** — Category Module: Created Category management with Filament Resource.
-- **Mar 11** — Inventory Module: Built Medicine inventory management with expiry alerts.
-- **Mar 13** — Frontend Client: Configured Axios interceptors and centralized API service.
-- **Mar 15** — State Management: Implemented global Cart context for the storefront.
-- **Mar 16** — UI Implementation: Built dynamic product grid with category filtering.
-- **Mar 17** — Product Views: Implemented detailed product modals and quantity selection.
+### Supporting Documentation
+
+- **`README.md`** — Primary onboarding and setup guide.
+- **`erd.md`** — Entity-Relationship Diagram documenting the database schema.
+
+## Key Features
+
+- **Inventory Management** — Real-time stock tracking with automated expiry date monitoring and low-stock alerts.
+- **Role-Based Access Control** — Custom enum-based RBAC supporting Admin, Staff, and Customer roles with granular permission enforcement.
+- **Point-of-Sale Operations** — In-store sales processing with automatic stock synchronisation upon transaction completion.
+- **E-Commerce Storefront** — Dynamic product catalogue with category filtering, cart management, and secure checkout.
+- **Administrative Panel** — Filament v3-powered dashboard for comprehensive business operations management.
 
 ## Prerequisites
 
-- PHP 8.2+, Composer
-- Node.js 20+, npm
+- PHP 8.2+ and Composer
+- Node.js 20+ and npm
 - SQLite (bundled) or MySQL 8.0
 - Git
 
-## Setup: Backend
+## Installation & Setup
 
-1. `cd backend`
-2. Copy env: `cp .env.example .env` (Windows: `copy .env.example .env`)
-3. Choose DB: keep `DB_CONNECTION=sqlite` or set MySQL creds.
-4. `composer install`
-5. `php artisan key:generate`
-6. `php artisan migrate --seed`
-7. `php artisan storage:link`
-8. `npm install` (for Vite/Tailwind assets)
-9. Run: `php artisan serve` (or `composer run dev` to serve app + queue + logs + Vite)
+### Backend
 
-## Setup: Frontend
-
-1. `cd frontend`
-2. Create `.env.local`:
-
-```env
-NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api/v1
-GEMINI_API_KEY=your_gemini_key
-GROQ_API_KEY=your_groq_key
+```bash
+cd backend
+cp .env.example .env          # Windows: copy .env.example .env
+composer install
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+npm install                    # Required for Vite/Tailwind asset compilation
+php artisan serve              # Or: composer run dev (serves app + queue + logs + Vite)
 ```
 
-3. `npm install`
-4. `npm run dev` then open http://localhost:3000
+### Frontend
 
-## Default Test Accounts
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
 
-- Admin: `admin@gmail.com` / `admin123`
-- Staff: `staff@gmail.com` / `staff123`
-- Customer: `customer@gmail.com` / `customer123`
+2. Create a `.env.local` file with the following variables:
+   ```env
+   NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api/v1
+   GEMINI_API_KEY=your_gemini_key
+   GROQ_API_KEY=your_groq_key
+   ```
 
-## Useful Commands
+3. Install dependencies and start the development server:
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-Backend:
-- `php artisan test` - backend tests.
-- `composer run dev` - serve app, queue listener, pail logs, Vite dev.
+4. Access the storefront at `http://localhost:3000`.
 
-Frontend:
-- `npm run dev` - Next.js dev server.
-- `npm run test` - Jest unit and component tests.
+## Default Credentials
+
+| Role     | Email                  | Password    |
+|----------|------------------------|-------------|
+| Admin    | admin@gmail.com        | admin123    |
+| Staff    | staff@gmail.com        | staff123    |
+| Customer | customer@gmail.com     | customer123 |
+
+## Development Commands
+
+| Context  | Command              | Description                                       |
+|----------|----------------------|---------------------------------------------------|
+| Backend  | `php artisan test`   | Execute the backend test suite                    |
+| Backend  | `composer run dev`   | Start application server, queue worker, and Vite  |
+| Frontend | `npm run dev`        | Start the Next.js development server              |
+| Frontend | `npm run test`       | Execute Jest unit and component tests             |
 
 ## Troubleshooting
 
-- **Hashing Errors**: If you encounter `Could not verify the hashed value's configuration`, ensure your models use the `hashed` cast and that you provide plain text passwords in your factories and seeders.
-- **Images 404**: Rerun `php artisan storage:link` to ensure the public disk is connected.
-- **API calls failing**: Confirm `NEXT_PUBLIC_API_URL` accurately matches the backend host/port in your `.env.local`.
+| Issue                  | Resolution                                                                                                         |
+|------------------------|--------------------------------------------------------------------------------------------------------------------|
+| Hashing errors         | Ensure models use the `hashed` cast and that factories/seeders provide plain-text passwords.                        |
+| Image 404 responses    | Re-run `php artisan storage:link` to re-establish the public disk symlink.                                          |
+| API connection failures| Verify that `NEXT_PUBLIC_API_URL` in `.env.local` matches the backend host and port exactly.                        |
