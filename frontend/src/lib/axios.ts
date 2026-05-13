@@ -5,7 +5,7 @@ const axiosInstance = axios.create({
   timeout: 60000,
   headers: {
     "Content-Type": "application/json",
-    "Accept": "application/json",
+    Accept: "application/json",
   },
 });
 
@@ -17,7 +17,9 @@ axiosInstance.interceptors.request.use((config) => {
     }
   }
 
-  console.log("🚀 Requesting to:", `${config.baseURL ?? ""}${config.url ?? ""}`);
+  if (process.env.NODE_ENV === "development") {
+    console.log("Requesting to:", `${config.baseURL ?? ""}${config.url ?? ""}`);
+  }
 
   return config;
 });

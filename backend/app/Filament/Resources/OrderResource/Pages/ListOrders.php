@@ -13,7 +13,9 @@ class ListOrders extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('New Order')
+                ->icon('heroicon-o-plus-circle'),
         ];
     }
 

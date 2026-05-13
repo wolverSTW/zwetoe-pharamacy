@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Medicine extends Model
 {
     use HasFactory;
-    // Add all the fields we defined in the migration
+
     protected $fillable = [
         'category_id',
         'name',
@@ -26,17 +26,5 @@ class Medicine extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
-    }
-
-    protected $appends = ['image_url', 'full_image_url'];
-
-    public function getImageUrlAttribute()
-    {
-        return $this->image ? asset('storage/' . str_replace('\\', '/', $this->image)) : null;
-    }
-
-    public function getFullImageUrlAttribute()
-    {
-        return $this->image ? asset('storage/' . str_replace('\\', '/', $this->image)) : null;
     }
 }

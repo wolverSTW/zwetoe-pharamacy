@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import axios from "axios";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ProductImage from "@/components/ui/ProductImage";
+import { Address, CartItem, User } from "@/types/store";
+import { getImageUrl } from "@/utils/imageHelper";
 
 // --- SVG Icons ---
 const StoreIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
@@ -20,47 +24,58 @@ const AlertCircle = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="
 export default function CartPage() {
   const { cart, removeFromCart, totalAmount, clearCart } = useCart();
   const router = useRouter();
+  const apiOrigin = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1\/?$/, "") ?? "";
 
   const [shippingMethod, setShippingMethod] = useState("pick-up");
   const [addressType, setAddressType] = useState("new");
-  const [savedAddress, setSavedAddress] = useState<any>(null);
+  const [savedAddress, setSavedAddress] = useState<Address | null>(null);
   const [finalTotal, setFinalTotal] = useState(0);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [invoiceNumber, setInvoiceNumber] = useState<string | null>(null);
-  const [addressForm, setAddressForm] = useState({ house_number: "", street: "", town: "", township: "", region: "", phone: "" });
+  const [addressForm, setAddressForm] = useState<Address>({
+    house_number: "",
+    street: "",
+    town: "",
+    township: "",
+    region: "",
+    phone: "",
+  });
 
   const [showQRModal, setShowQRModal] = useState(false);
   const [modalView, setModalView] = useState<"payment" | "invoice" | "success">("payment");
   const [qrImage, setQrImage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
+  const [purchasedItems, setPurchasedItems] = useState<CartItem[]>([]);
   const [isClient, setIsClient] = useState(false);
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [showError, setShowError] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+
     const userData = localStorage.getItem("user");
     if (userData) {
-      const user = JSON.parse(userData);
+      const user = JSON.parse(userData) as User;
       if (user.address) { setSavedAddress(user.address); setAddressType("default"); }
     }
   }, []);
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleConfirmOrder = () => {
     if (!cart || cart.length === 0) return;
-    const token = localStorage.getItem("token");
-    if (!token) return router.push("/login");
+    if (!isLoggedIn) return router.push("/login");
 
     setFinalTotal(totalAmount);
     setPurchasedItems([...cart]);
-    setQrImage(`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}/images/qr/kbz-pay-qr.jpg`); 
+    setQrImage(`${apiOrigin}/images/qr/kbz-pay-qr.jpg`);
     setModalView("payment");
     setShowQRModal(true);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       setScreenshot(e.target.files[0]);
       setShowError(false);
@@ -82,7 +97,7 @@ export default function CartPage() {
       formData.append("shipping_method", shippingMethod);
       formData.append("payment_method", "kbzpay");
       
-      const itemData = cart.map((item: any) => ({
+      const itemData = cart.map((item) => ({
         medicine_id: item.id,
         quantity: item.quantity || 1
       }));
@@ -115,6 +130,8 @@ export default function CartPage() {
 
   if (!isClient) return null;
 
+  const isEmpty = !cart || cart.length === 0;
+
   return (
     <main className="min-h-screen bg-[#05070a] text-[#e1e1e1] antialiased">
       <nav className="border-b border-[#1a1d23] bg-[#05070a]/90 backdrop-blur-xl sticky top-0 z-50">
@@ -128,112 +145,162 @@ export default function CartPage() {
       </nav>
 
       <div className="container mx-auto px-6 py-12 max-w-6xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          
-          <div className="lg:col-span-7 space-y-10">
-            <header><h1 className="text-3xl font-extrabold text-white tracking-tight">Checkout</h1></header>
-
-            {/* --- Logistics Section --- */}
-            <section className="space-y-6">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">01 — Logistics</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button onClick={() => setShippingMethod("pick-up")} className={`p-6 rounded-xl border-2 flex items-center gap-4 transition-all ${shippingMethod === 'pick-up' ? 'border-emerald-500 bg-emerald-500/5 text-emerald-400' : 'border-[#1a1d23] bg-[#0f1115] text-gray-400 hover:border-gray-700'}`}>
-                  <StoreIcon /> <span className="font-bold text-sm">Store Pickup</span>
-                </button>
-                <button onClick={() => setShippingMethod("delivery")} className={`p-6 rounded-xl border-2 flex items-center gap-4 transition-all ${shippingMethod === 'delivery' ? 'border-emerald-500 bg-emerald-500/5 text-emerald-400' : 'border-[#1a1d23] bg-[#0f1115] text-gray-400 hover:border-gray-700'}`}>
-                  <TruckIcon /> <span className="font-bold text-sm">Home Delivery</span>
-                </button>
-              </div>
-
-              {shippingMethod === "pick-up" && (
-                <div className="animate-in fade-in slide-in-from-top-4 duration-500 space-y-4">
-                  <div className="bg-[#0f1115] p-5 rounded-2xl border border-[#1a1d23] flex items-start gap-4">
-                    <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500"><MapPinIcon /></div>
-                    <div>
-                      <h4 className="text-sm font-bold text-white">Our Shop Address</h4>
-                      <p className="text-xs text-gray-400 mt-1 leading-relaxed">No. 51, Corner of Lanmadaw Road & Bo Yone Street, Padigon, Thegon Township, Bago West, Myanmar.</p>
-                    </div>
-                  </div>
-                  <div className="w-full h-72 rounded-2xl overflow-hidden border border-[#1a1d23]">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d945.5226247845142!2d95.45813426949839!3d18.5699582701896!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30c70d1370d6d0d5%3A0x3e2faf1662ed0c1d!2sZwe%20Toe%20Pharmacy!5e0!3m2!1sen!2smm!4v1771490601871!5m2!1sen!2smm" width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy"></iframe>
-                  </div>
-                </div>
-              )}
-
-              {shippingMethod === "delivery" && (
-                <div className="animate-in fade-in slide-in-from-top-4 duration-500 space-y-6">
-                  <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl flex items-center gap-3 text-amber-500">
-                    <AlertCircle />
-                    <p className="text-xs font-bold uppercase tracking-tight">⚠ Delivery fees must be paid by the customers!</p>
-                  </div>
-
-                  <div className="bg-[#0f1115] p-6 rounded-2xl border border-[#1a1d23] space-y-6">
-                    {savedAddress && (
-                      <div className="flex gap-4 mb-4">
-                        <button onClick={() => setAddressType("default")} className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all ${addressType === 'default' ? 'bg-emerald-500 text-black' : 'bg-[#1a1d23] text-gray-400'}`}>Use Saved</button>
-                        <button onClick={() => setAddressType("new")} className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all ${addressType === 'new' ? 'bg-emerald-500 text-black' : 'bg-[#1a1d23] text-gray-400'}`}>Add New</button>
-                      </div>
-                    )}
-                    {addressType === "new" ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {Object.keys(addressForm).map((field) => (
-                          <div key={field} className="space-y-2">
-                            <label className="text-[10px] uppercase font-bold text-gray-500 ml-1">{field.replace('_', ' ')}</label>
-                            <input type="text" className="w-full bg-[#05070a] border border-[#1a1d23] rounded-xl px-4 py-3 text-sm focus:border-emerald-500 outline-none transition-all" value={(addressForm as any)[field]} onChange={(e) => setAddressForm({...addressForm, [field]: e.target.value})}/>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="p-4 bg-[#05070a] rounded-xl border border-emerald-500/30">
-                        <p className="text-xs text-emerald-500 font-bold mb-2 uppercase tracking-widest">Selected Address</p>
-                        <p className="text-sm text-gray-300 leading-relaxed">{savedAddress.house_number}, {savedAddress.street}, {savedAddress.township}, {savedAddress.region}</p>
-                        <p className="text-sm text-white font-bold mt-2">{savedAddress.phone}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </section>
-
-            {/* --- Selected Items Section --- */}
-            <section className="space-y-4">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">02 — Selected Items</h3>
-              <div className="space-y-3">
-                {cart.map((item: any) => (
-                  <div key={item.id} className="bg-[#0f1115] p-4 rounded-xl flex items-center justify-between border border-[#1a1d23]">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[#05070a] rounded-lg flex items-center justify-center border border-[#1a1d23]">
-                        {item.image_url ? <img src={item.image_url} className="w-full h-full object-cover" alt="" /> : <PillIcon />}
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-sm text-white">{item.name}</h4>
-                        <p className="text-emerald-500 text-xs font-semibold">{(item.sell_price || item.price || 0).toLocaleString()} MMK x {item.quantity}</p>
-                      </div>
-                    </div>
-                    <button onClick={() => removeFromCart(item.id)} className="text-gray-500 hover:text-red-500 text-xs font-bold px-3 py-1 border border-[#1a1d23] rounded-md transition-all">Remove</button>
-                  </div>
-                ))}
-              </div>
-            </section>
+        {isEmpty ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-700">
+            <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-8 border border-white/5">
+               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gray-600"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+            <h1 className="text-3xl font-black text-white uppercase tracking-tight mb-4">Your cart is <span className="text-emerald-500">Empty</span></h1>
+            <p className="text-gray-500 text-sm max-w-xs mx-auto mb-10 leading-relaxed font-medium">Looks like you haven't added any medicines to your cart yet.</p>
+            <Link href="/" className="bg-emerald-500 hover:bg-emerald-400 text-black px-10 py-4 rounded-xl font-black uppercase text-xs tracking-widest transition-all shadow-xl shadow-emerald-500/10">Browse Catalogue</Link>
           </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            
+            <div className="lg:col-span-7 space-y-10">
+              <header>
+                <h1 className="text-3xl font-extrabold text-white tracking-tight">
+                  {isLoggedIn ? "Checkout" : "Review Cart"}
+                </h1>
+                {!isLoggedIn && (
+                  <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mt-2 bg-emerald-500/10 inline-block px-3 py-1 rounded-full">Guest Session</p>
+                )}
+              </header>
 
-          {/* --- Sidebar Summary --- */}
-          <div className="lg:col-span-5 no-print">
-            <div className="bg-[#0f1115] p-8 md:p-10 rounded-[2.5rem] border border-[#1a1d23] sticky top-24 shadow-2xl">
-              <h3 className="text-xs font-bold uppercase tracking-[0.2em] mb-8 text-gray-500">Price Details</h3>
-              <div className="space-y-4 mb-8 pt-6 border-t border-[#1a1d23]">
-                <div className="flex justify-between items-center text-sm font-medium"><span className="text-gray-400">Subtotal</span><span className="text-white font-bold">{totalAmount.toLocaleString()} MMK</span></div>
-                <div className="flex justify-between items-end border-t border-[#1a1d23] pt-6 mt-2">
-                  <span className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Total Payable</span>
-                  <div className="text-right"><span className="text-4xl font-black text-white leading-none">{totalAmount.toLocaleString()}</span><span className="text-xs font-bold text-gray-600 ml-2">MMK</span></div>
+              {/* --- Logistics Section (Only for Logged In Users) --- */}
+              {isLoggedIn ? (
+                <section className="space-y-6">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">01 — Logistics</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button onClick={() => setShippingMethod("pick-up")} className={`p-6 rounded-xl border-2 flex items-center gap-4 transition-all ${shippingMethod === 'pick-up' ? 'border-emerald-500 bg-emerald-500/5 text-emerald-400' : 'border-[#1a1d23] bg-[#0f1115] text-gray-400 hover:border-gray-700'}`}>
+                      <StoreIcon /> <span className="font-bold text-sm">Store Pickup</span>
+                    </button>
+                    <button onClick={() => setShippingMethod("delivery")} className={`p-6 rounded-xl border-2 flex items-center gap-4 transition-all ${shippingMethod === 'delivery' ? 'border-emerald-500 bg-emerald-500/5 text-emerald-400' : 'border-[#1a1d23] bg-[#0f1115] text-gray-400 hover:border-gray-700'}`}>
+                      <TruckIcon /> <span className="font-bold text-sm">Home Delivery</span>
+                    </button>
+                  </div>
+
+                  {shippingMethod === "pick-up" && (
+                    <div className="animate-in fade-in slide-in-from-top-4 duration-500 space-y-4">
+                      <div className="bg-[#0f1115] p-5 rounded-2xl border border-[#1a1d23] flex items-start gap-4">
+                        <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500"><MapPinIcon /></div>
+                        <div>
+                          <h4 className="text-sm font-bold text-white">Our Shop Address</h4>
+                          <p className="text-xs text-gray-400 mt-1 leading-relaxed">No. 51, Corner of Lanmadaw Road & Bo Yone Street, Padigon, Thegon Township, Bago West, Myanmar.</p>
+                        </div>
+                      </div>
+                      <div className="w-full h-72 rounded-2xl overflow-hidden border border-[#1a1d23]">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d945.5226247845142!2d95.45813426949839!3d18.5699582701896!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30c70d1370d6d0d5%3A0x3e2faf1662ed0c1d!2sZwe%20Toe%20Pharmacy!5e0!3m2!1sen!2smm!4v1771490601871!5m2!1sen!2smm" width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy"></iframe>
+                      </div>
+                    </div>
+                  )}
+
+                  {shippingMethod === "delivery" && (
+                    <div className="animate-in fade-in slide-in-from-top-4 duration-500 space-y-6">
+                      <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl flex items-center gap-3 text-amber-500">
+                        <AlertCircle />
+                        <p className="text-xs font-bold uppercase tracking-tight">⚠ Delivery fees must be paid by the customers!</p>
+                      </div>
+
+                      <div className="bg-[#0f1115] p-6 rounded-2xl border border-[#1a1d23] space-y-6">
+                        {savedAddress && (
+                          <div className="flex gap-4 mb-4">
+                            <button onClick={() => setAddressType("default")} className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all ${addressType === 'default' ? 'bg-emerald-500 text-black' : 'bg-[#1a1d23] text-gray-400'}`}>Use Saved</button>
+                            <button onClick={() => setAddressType("new")} className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all ${addressType === 'new' ? 'bg-emerald-500 text-black' : 'bg-[#1a1d23] text-gray-400'}`}>Add New</button>
+                          </div>
+                        )}
+                        {addressType === "new" ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {Object.keys(addressForm).map((field) => (
+                              <div key={field} className="space-y-2">
+                                <label className="text-[10px] uppercase font-bold text-gray-500 ml-1">{field.replace('_', ' ')}</label>
+                                <input type="text" className="w-full bg-[#05070a] border border-[#1a1d23] rounded-xl px-4 py-3 text-sm focus:border-emerald-500 outline-none transition-all" value={(addressForm as any)[field]} onChange={(e) => setAddressForm({...addressForm, [field]: e.target.value})}/>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="p-4 bg-[#05070a] rounded-xl border border-emerald-500/30">
+                            <p className="text-xs text-emerald-500 font-bold mb-2 uppercase tracking-widest">Selected Address</p>
+                            <p className="text-sm text-gray-300 leading-relaxed">{savedAddress!.house_number}, {savedAddress!.street}, {savedAddress!.township}, {savedAddress!.region}</p>
+                            <p className="text-sm text-white font-bold mt-2">{savedAddress!.phone}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </section>
+              ) : (
+                <div className="bg-[#0f1115] border border-white/5 p-8 rounded-3xl space-y-4">
+                   <div className="flex items-center gap-4 text-emerald-500 mb-2">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                      <h3 className="font-black uppercase text-sm tracking-widest">Login Required</h3>
+                   </div>
+                   <p className="text-gray-400 text-xs font-bold leading-relaxed">You are currently browsing as a <span className="text-white">Guest</span>. To finalize your order and manage delivery logistics, please sign in to your account.</p>
+                   <div className="flex gap-3 pt-4">
+                      <Link href="/login" className="bg-emerald-500 text-black px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-emerald-400 transition-all">Sign In</Link>
+                      <Link href="/register" className="bg-[#1a1d23] text-white px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-white/5 transition-all">Create Account</Link>
+                   </div>
                 </div>
+              )}
+
+              {/* --- Selected Items Section --- */}
+              <section className="space-y-4">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                   {isLoggedIn ? "02 — Selected Items" : "Selected Items"}
+                </h3>
+                <div className="space-y-3">
+                  {cart.map((item) => (
+                    <div key={item.id} className="bg-[#0f1115] p-4 rounded-xl flex items-center justify-between border border-[#1a1d23] group/item hover:border-emerald-500/20 transition-all">
+                      <div className="flex items-center gap-4">
+                        <div className="relative w-12 h-12 bg-[#05070a] rounded-lg flex items-center justify-center border border-[#1a1d23] overflow-hidden">
+                          {item.image ? (
+                            <ProductImage
+                              src={getImageUrl(item.image)}
+                              alt={item.name}
+                              sizes="48px"
+                              className="object-cover group-hover/item:scale-110 transition-transform duration-500"
+                              iconClassName="w-5 h-5 text-gray-500"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center bg-[#05070a]">
+                               <PillIcon />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-white group-hover/item:text-emerald-500 transition-colors">{item.name}</h4>
+                          <p className="text-emerald-500 text-xs font-semibold">{(item.sell_price || item.price || 0).toLocaleString()} MMK x {item.quantity}</p>
+                        </div>
+                      </div>
+                      <button onClick={() => removeFromCart(item.id)} className="text-gray-600 hover:text-red-500 text-xs font-bold px-3 py-1 border border-[#1a1d23] rounded-md transition-all hover:border-red-500/20">Remove</button>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            {/* --- Sidebar Summary --- */}
+            <div className="lg:col-span-5 no-print">
+              <div className="bg-[#0f1115] p-8 md:p-10 rounded-[2.5rem] border border-[#1a1d23] sticky top-24 shadow-2xl">
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] mb-8 text-gray-500">Price Details</h3>
+                <div className="space-y-4 mb-8 pt-6 border-t border-[#1a1d23]">
+                  <div className="flex justify-between items-center text-sm font-medium"><span className="text-gray-400">Subtotal</span><span className="text-white font-bold">{totalAmount.toLocaleString()} MMK</span></div>
+                  <div className="flex justify-between items-end border-t border-[#1a1d23] pt-6 mt-2">
+                    <span className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Total Payable</span>
+                    <div className="text-right"><span className="text-4xl font-black text-white leading-none">{totalAmount.toLocaleString()}</span><span className="text-xs font-bold text-gray-600 ml-2">MMK</span></div>
+                  </div>
+                </div>
+                <button 
+                  onClick={handleConfirmOrder} 
+                  disabled={loading} 
+                  className={`w-full mt-10 py-4 rounded-xl font-bold uppercase text-sm transition-all shadow-lg active:scale-95 ${isLoggedIn ? 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-emerald-500/10' : 'bg-[#1a1d23] text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-black'}`}
+                >
+                  {loading ? "Processing..." : isLoggedIn ? "Confirm & Pay" : "Sign In to Checkout"}
+                </button>
               </div>
-              <button onClick={handleConfirmOrder} disabled={loading || cart.length === 0} className="w-full mt-10 bg-emerald-500 hover:bg-emerald-400 py-4 rounded-xl font-bold text-black uppercase text-sm transition-all shadow-lg active:scale-95">
-                {loading ? "Processing..." : "Confirm & Pay"}
-              </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* --- QR/Invoice Modal --- */}
@@ -286,8 +353,15 @@ export default function CartPage() {
                 </div>
                 <div className="bg-white p-10 md:p-16 flex flex-col items-center justify-center md:w-1/2 no-print print:hidden">
                    <p className="text-xs font-bold text-blue-600 tracking-widest pb-4 uppercase">Step 2: Scan with KBZPay</p>
-                   <div className="w-full max-w-70 aspect-square border-4 border-gray-100 p-2 rounded-xl">
-                      <img src={qrImage || `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}/images/qr/kbz-pay-qr.jpg`} alt="QR" className="w-full h-full object-contain" />
+                   <div className="relative w-full max-w-70 aspect-square border-4 border-gray-100 p-2 rounded-xl overflow-hidden">
+                      <Image
+                        src={qrImage || `${apiOrigin}/images/qr/kbz-pay-qr.jpg`}
+                        alt="KBZPay QR code"
+                        fill
+                        unoptimized
+                        sizes="(min-width: 768px) 28rem, 80vw"
+                        className="object-contain"
+                      />
                    </div>
                    <div className="mt-8 text-center text-black">
                       <p className="text-sm font-black tracking-widest uppercase">Zwe Toe Pharmacy</p>
@@ -339,7 +413,7 @@ export default function CartPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {purchasedItems.map((item: any) => (
+                        {purchasedItems.map((item) => (
                           <tr key={item.id} className="text-xs font-bold border-b border-gray-50">
                             <td className="py-5 pr-4 text-black">{item.name}</td>
                             <td className="py-5 text-center text-gray-600">{item.quantity}</td>

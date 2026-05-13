@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
+use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -38,7 +39,7 @@ class OrderResource extends Resource
 
     public static function canCreate(): bool
     {
-        return false;
+        return true;
     }
 
     public static function form(Form $form): Form
@@ -79,15 +80,63 @@ class OrderResource extends Resource
                         ->required()
                         ->native(false),
 
-                    Forms\Components\TextInput::make('payment_method')
+                    Forms\Components\Select::make('payment_method')
                         ->label('Payment Method')
-                        ->disabled(),
+                        ->options([
+                            'cash' => 'Cash',
+                            'kpay' => 'K-Pay',
+                            'wave' => 'Wave Money',
+                            'card' => 'Card',
+                        ])
+                        ->default('cash')
+                        ->required(),
 
                     Forms\Components\TextInput::make('total_amount')
                         ->label('Total Amount (MMK)')
                         ->numeric()
-                        ->disabled(),
-                ])->columns(2),
+                        ->required()
+                        ->readOnly(),
+                ])->columns(3),
+
+            Forms\Components\Section::make('Order Items')
+                ->schema([
+                    Forms\Components\Repeater::make('items')
+                        ->relationship()
+                        ->schema([
+                            Forms\Components\Select::make('medicine_id')
+                                ->label('Medicine')
+                                ->relationship('medicine', 'name')
+                                ->required()
+                                ->reactive()
+                                ->afterStateUpdated(fn ($state, Forms\Set $set) => 
+                                    $set('unit_price', \App\Models\Medicine::find($state)?->sell_price ?? 0)
+                                ),
+                            Forms\Components\TextInput::make('quantity')
+                                ->numeric()
+                                ->default(1)
+                                ->required()
+                                ->reactive()
+                                ->afterStateUpdated(fn ($state, Forms\Get $get, Forms\Set $set) => 
+                                    $set('subtotal', $state * $get('unit_price'))
+                                ),
+                            Forms\Components\TextInput::make('unit_price')
+                                ->numeric()
+                                ->prefix('MMK')
+                                ->required()
+                                ->readOnly(),
+                            Forms\Components\TextInput::make('subtotal')
+                                ->numeric()
+                                ->prefix('MMK')
+                                ->required()
+                                ->readOnly(),
+                        ])
+                        ->columns(4)
+                        ->live()
+                        ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
+                            $total = collect($get('items'))->sum('subtotal');
+                            $set('total_amount', $total);
+                        }),
+                ])->visible(true),
 
             Forms\Components\Section::make('Payment Verification')
                 ->schema([
@@ -112,36 +161,7 @@ class OrderResource extends Resource
                         ->columnSpanFull(),
                 ])->columns(2),
 
-            Forms\Components\Section::make('Ordered Medicines')
-                ->schema([
-                    Forms\Components\Repeater::make('items')
-                        ->relationship()
-                        ->schema([
-                            Forms\Components\Select::make('medicine_id')
-                                ->relationship('medicine', 'name')
-                                ->label('Medicine')
-                                ->disabled(),
 
-                            Forms\Components\TextInput::make('quantity')
-                                ->numeric()
-                                ->disabled(),
-
-                            Forms\Components\TextInput::make('unit_price')
-                                ->label('Unit Price')
-                                ->numeric()
-                                ->prefix('MMK')
-                                ->disabled(),
-
-                            Forms\Components\TextInput::make('subtotal')
-                                ->numeric()
-                                ->prefix('MMK')
-                                ->disabled(),
-                        ])
-                        ->columns(4)
-                        ->disabled()
-                        ->deletable(false)
-                        ->addable(false),
-                ]),
         ]);
     }
 
@@ -169,30 +189,7 @@ class OrderResource extends Resource
                         Infolists\Components\TextEntry::make('created_at')->dateTime()->label('Submission Date'),
                     ])->columns(5),
 
-                Infolists\Components\Section::make('Inventory Selection (Items)')
-                    ->schema([
-                        Infolists\Components\RepeatableEntry::make('items')
-                            ->label('')
-                            ->schema([
-                                Infolists\Components\ImageEntry::make('medicine.image')
-                                    ->label('Visual Ref')
-                                    ->visibility('public')
-                                    ->disk('public'),
-                                Infolists\Components\TextEntry::make('medicine.name')
-                                    ->label('Medicine Name')
-                                    ->weight('bold'),
-                                Infolists\Components\TextEntry::make('quantity')
-                                    ->label('Units'),
-                                Infolists\Components\TextEntry::make('unit_price')
-                                    ->label('Unit Val')
-                                    ->money('MMK'),
-                                Infolists\Components\TextEntry::make('subtotal')
-                                    ->label('Line Total')
-                                    ->money('MMK')
-                                    ->color('success')
-                                    ->weight('black'),
-                            ])->columns(5)
-                    ]),
+
 
                 Infolists\Components\Grid::make(2)
                     ->schema([
@@ -201,8 +198,7 @@ class OrderResource extends Resource
                                 Infolists\Components\TextEntry::make('shipping_method')->label('Logistics Mode'),
                                 Infolists\Components\TextEntry::make('address')
                                     ->label('Final Destination')
-                                    ->listWithLineBreaks()
-                                    ->limitObjects(5),
+                                    ->listWithLineBreaks(),
                             ]),
 
                         Infolists\Components\Section::make('Settlement Status')
@@ -329,6 +325,13 @@ class OrderResource extends Resource
                 Tables\Actions\EditAction::make()->label('Update Status'),
                 Tables\Actions\DeleteAction::make(),
             ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\ItemsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

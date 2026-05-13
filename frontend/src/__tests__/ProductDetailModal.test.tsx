@@ -23,11 +23,12 @@ jest.mock('../utils/imageHelper', () => ({
 
 describe('ProductDetailModal', () => {
     const mockItem = {
+        id: 1,
         name: 'Paracetamol',
         price: 1500,
         stock_quantity: 10,
         image: 'test.jpg',
-        category: { name: 'Painkiller' }
+        category: { id: 1, name: 'Painkiller' }
     };
 
     const mockAddToCart = jest.fn();

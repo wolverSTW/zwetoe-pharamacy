@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 
-export default function GuestHomePage() {
+export default function GuestHomePage({
+  isHydrating = false,
+}: {
+  isHydrating?: boolean;
+}) {
   return (
     <main className="min-h-screen bg-[#0d1117] text-white font-sans overflow-hidden">
       {/* Background Glow Effects */}
@@ -18,7 +22,9 @@ export default function GuestHomePage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span className="text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em]">Open 24/7 For You</span>
+            <span className="text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em]">
+              {isHydrating ? "Loading your pharmacy..." : "Open 24/7 For You"}
+            </span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-8">

@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Medicine;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -23,16 +24,23 @@ class OrderController extends Controller
             'payment_screenshot' => app()->environment('testing') ? 'nullable' : 'required|image|max:2048', 
         ]);
 
-        try {
-            return DB::transaction(function () use ($request, $user) {
-                
-                $path = null;
-                if ($request->hasFile('payment_screenshot')) {
-                    $path = $request->file('payment_screenshot')->store('payment-proofs', 'public');
-                }
+        $path = null;
 
-                $items = is_array($request->items) ? $request->items : json_decode($request->items, true);
-                $address = is_array($request->address) ? $request->address : json_decode($request->address, true);
+        try {
+            if ($request->hasFile('payment_screenshot')) {
+                $path = $request->file('payment_screenshot')->store('payment-proofs', 'public');
+            }
+
+            $items = is_array($request->items) ? $request->items : json_decode($request->items, true);
+            $address = is_array($request->address) ? $request->address : json_decode($request->address, true);
+            $medicineIds = collect($items)->pluck('medicine_id')->unique()->values();
+
+            return DB::transaction(function () use ($request, $user, $path, $items, $address, $medicineIds) {
+                $medicines = Medicine::query()
+                    ->whereIn('id', $medicineIds)
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
 
                 $order = Order::create([
                     'customer_id' => $user->id,
@@ -48,7 +56,7 @@ class OrderController extends Controller
                 $totalAmount = 0;
 
                 foreach ($items as $item) {
-                    $medicine = Medicine::lockForUpdate()->find($item['medicine_id']);
+                    $medicine = $medicines->get($item['medicine_id']);
 
                     if (!$medicine || $medicine->stock_quantity < $item['quantity']) {
                         throw new \Exception("Insufficient stock for " . ($medicine->name ?? 'Medicine'));
@@ -69,10 +77,11 @@ class OrderController extends Controller
 
                 $order->update(['total_amount' => $totalAmount]);
 
-                $customer = Customer::find($user->id);
-                if ($customer) {
-                    $customer->increment('total_spent', $totalAmount);
+                if ($user instanceof Customer) {
+                    $user->increment('total_spent', $totalAmount);
                 }
+
+                Cache::forget('admin_dashboard_stats');
 
                 return response()->json([
                     'message' => 'Order placed successfully!',
@@ -83,6 +92,10 @@ class OrderController extends Controller
             });
 
         } catch (\Exception $e) {
+            if ($path) {
+                Storage::disk('public')->delete($path);
+            }
+
             return response()->json([
                 'message' => 'Order failed: ' . $e->getMessage()
             ], 400);

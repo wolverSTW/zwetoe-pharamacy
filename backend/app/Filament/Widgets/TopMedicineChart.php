@@ -9,9 +9,16 @@ use Illuminate\Support\Facades\DB;
 
 class TopMedicineChart extends ChartWidget
 {
-    protected static ?string $heading = 'Top Selling Medicines (by Volume)';
-    protected static ?int $sort = 5;
-    protected int | string | array $columnSpan = 1;
+    protected static ?string $heading = 'Top Selling Medicines';
+    protected static ?int $sort = 4;
+
+    public static function canView(): bool
+    {
+        return auth()->user()->role === 'admin';
+    }
+
+    // Bar charts often look better with more horizontal space, but for parallel layout we use span 1
+    protected int|string|array $columnSpan = 1;
 
     protected function getData(): array
     {
@@ -43,6 +50,6 @@ class TopMedicineChart extends ChartWidget
 
     protected function getType(): string
     {
-        return 'polarArea';
+        return 'bar';
     }
 }

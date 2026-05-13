@@ -9,8 +9,9 @@ export default function Navbar() {
   const { totalItems } = useCart();
   const pathname = usePathname();
 
-  const displayName = 
-    user?.customer_name || user?.name || user?.username || "Customer";
+  const displayName =
+    user?.customer_name ?? user?.name ?? user?.username ?? user?.email ?? "Customer";
+  const avatarLabel = displayName.charAt(0).toUpperCase();
 
   const guestLinks = [
     { name: "Home", href: "/" },
@@ -87,7 +88,7 @@ export default function Navbar() {
                 <span className="text-[8px] text-emerald-500 font-black uppercase tracking-widest mt-0.5">Member</span>
               </div>
               <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xs font-black uppercase">
-                {displayName.charAt(0)}
+                {avatarLabel}
               </div>
               <button onClick={logout} className="text-red-500 hover:text-red-400 text-[11px] font-bold ml-1 transition-colors uppercase">Logout</button>
             </div>

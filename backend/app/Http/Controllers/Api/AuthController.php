@@ -8,6 +8,7 @@ use App\Models\User;
 use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -19,35 +20,41 @@ class AuthController extends Controller
     {
         // 1. Validate incoming request data
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:customers',
-            'password' => 'required|string|min:8|confirmed',
+            'name'                  => 'required|string|max:255',
+            'email'                 => 'required|string|email|max:255|unique:customers',
+            'phone'                 => 'nullable|string|max:20',
+            'password'              => 'required|string|min:8|confirmed',
+            'password_confirmation' => 'required',
         ]);
 
         // 2. Create a new customer record with 'pending' status
         $customer = Customer::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'phone'    => $request->phone,
             'password' => Hash::make($request->password),
-            'status' => 'pending', 
+            'status'   => 'pending',
         ]);
 
-        // 3. Get all Admin and Staff users to receive notification
-        $receivers = User::whereIn('role', ['admin', 'staff'])->get();
+        Cache::forget('admin_dashboard_stats');
 
-        // 4. Send a Filament database notification to Admin/Staff
-        Notification::make()
-            ->title('New Customer Registered')
-            ->icon('heroicon-o-user-plus')
-            ->body("**{$customer->name}** has joined the system.")
-            ->actions([
-                Action::make('view')
-                    ->button()
-                    ->url("/admin/customers"), // Redirect link for Admin panel
-            ])
-            ->sendToDatabase($receivers);
+        // 3. Send admin notifications after the response so registration returns faster.
+        app()->terminating(function () use ($customer) {
+            $receivers = User::whereIn('role', ['admin', 'staff'])->get();
 
-        // 5. Return success response to Frontend
+            Notification::make()
+                ->title('New Customer Registered')
+                ->icon('heroicon-o-user-plus')
+                ->body("**{$customer->name}** has joined the system.")
+                ->actions([
+                    Action::make('view')
+                        ->button()
+                        ->url("/admin/customers"),
+                ])
+                ->sendToDatabase($receivers);
+        });
+
+        // 4. Return success response to Frontend
         return response()->json([
             'status' => 'success',
             'message' => 'Registration successful! Please wait for admin approval.',
@@ -77,11 +84,16 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // 4. Check if the account is approved by Admin
-        if ($customer->status === 'pending') {
+        // 4. Only approved customers can log in.
+        if ($customer->status !== 'approved') {
+            $message = match ($customer->status) {
+                'rejected' => 'Your account has been rejected. Please contact support.',
+                default => 'Your account is pending admin approval.',
+            };
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Your account is pending admin approval.'
+                'message' => $message,
             ], 403);
         }
 
@@ -102,8 +114,10 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        // 1. Delete the current access token to revoke access
-        $request->user()->currentAccessToken()->delete();
+        // 1. Delete the current access token to revoke access (if it exists)
+        if ($request->user()->currentAccessToken()) {
+            $request->user()->currentAccessToken()->delete();
+        }
         
         // 2. Return logout confirmation
         return response()->json([

@@ -1,135 +1,125 @@
 <x-filament-widgets::widget>
     <style>
         .zw-welcome-card {
-            background: linear-gradient(135deg, #0f172a 0%, #0c1a2e 100%);
-            border-radius: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            padding: 2.25rem 2.5rem;
-            color: white;
+            background: #ffffff;
+            border-radius: 1rem;
+            padding: 1.5rem 2rem;
+            color: #1e293b;
             font-family: inherit;
-            border: 1px solid rgba(16, 185, 129, 0.12);
-            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04);
-        }
-        .zw-glow-1 {
-            position: absolute; top: -80px; right: -60px;
-            width: 380px; height: 380px;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.14) 0%, transparent 65%);
-            filter: blur(50px); z-index: 0;
-        }
-        .zw-glow-2 {
-            position: absolute; bottom: -80px; left: -60px;
-            width: 350px; height: 350px;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, transparent 65%);
-            filter: blur(50px); z-index: 0;
-        }
-        .zw-glow-3 {
-            position: absolute; top: 50%; left: 40%;
-            width: 200px; height: 200px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, transparent 65%);
-            filter: blur(40px); z-index: 0;
+            border: 1px solid #e2e8f0;
         }
         .zw-content {
-            position: relative; z-index: 1;
-            display: flex; align-items: center;
-            justify-content: space-between; gap: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
         }
         .zw-left { flex: 1; min-width: 0; }
-        .zw-eyebrow {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 3px 12px; border-radius: 99px;
-            background: rgba(16, 185, 129, 0.12);
-            border: 1px solid rgba(16, 185, 129, 0.25);
-            font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em;
-            text-transform: uppercase; color: #10b981;
-            margin-bottom: 0.75rem;
+        .zw-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 99px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #059669;
+            margin-bottom: 0.5rem;
         }
         .zw-live-dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: #10b981; animation: zw-live-pulse 2s infinite;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: zw-pulse 2s infinite;
         }
-        @keyframes zw-live-pulse {
-            0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+        @keyframes zw-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
         .zw-title {
-            font-size: 1.75rem; font-weight: 800;
-            margin-bottom: 0.35rem; letter-spacing: -0.025em; line-height: 1.2;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
         }
-        .zw-highlight { color: #10b981; }
+        .zw-highlight { color: #059669; }
         .zw-subtitle {
-            color: #64748b; font-size: 0.8rem; font-weight: 500;
+            color: #64748b;
+            font-size: 0.8rem;
         }
-        .zw-time-tag { color: #10b981; opacity: 0.8; }
         .zw-pills {
-            display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
         }
         .zw-pill {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.07);
-            padding: 0.65rem 1.1rem; border-radius: 0.875rem;
-            display: flex; align-items: center; gap: 0.65rem;
-            transition: all 0.2s ease; cursor: default;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 0.6rem 1rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: border-color 0.2s;
         }
         .zw-pill:hover {
-            border-color: rgba(16, 185, 129, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px -8px rgba(16, 185, 129, 0.2);
+            border-color: #a7f3d0;
         }
         .zw-pill-icon {
-            width: 32px; height: 32px; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
         .zw-pill-icon svg { width: 16px; height: 16px; }
-        .icon-emerald { background: rgba(16,185,129,0.15); color: #10b981; }
-        .icon-amber   { background: rgba(245,158,11,0.15);  color: #f59e0b; }
-        .icon-sky     { background: rgba(56,189,248,0.15);  color: #38bdf8; }
-        .icon-rose    { background: rgba(244,63,94,0.15);   color: #f43f5e; }
-        .icon-violet  { background: rgba(139,92,246,0.15);  color: #8b5cf6; }
+        .icon-emerald { background: #ecfdf5; color: #059669; }
+        .icon-amber   { background: #fffbeb; color: #d97706; }
+        .icon-sky     { background: #f0f9ff; color: #0284c7; }
+        .icon-rose    { background: #fff1f2; color: #e11d48; }
+        .icon-violet  { background: #f5f3ff; color: #7c3aed; }
         .zw-pill-val {
-            font-size: 1.05rem; font-weight: 800; line-height: 1;
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1;
         }
         .zw-pill-lbl {
-            font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.09em;
-            color: #475569; font-weight: 700; line-height: 1.3;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #94a3b8;
+            font-weight: 600;
         }
         .zw-right {
-            display: none; align-items: center; justify-content: center;
-            width: 110px; height: 110px; border-radius: 50%;
-            background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.15);
-            position: relative; flex-shrink: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: #ecfdf5;
+            flex-shrink: 0;
         }
         @media (min-width: 768px) { .zw-right { display: flex; } }
-        .zw-ring {
-            position: absolute; inset: -8px; border-radius: 50%;
-            border: 1px dashed rgba(16,185,129,0.2);
-            animation: zw-spin 20s linear infinite;
-        }
-        @keyframes zw-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .zw-ring-dot {
-            position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
-            width: 6px; height: 6px; border-radius: 50%; background: #10b981;
-        }
     </style>
 
     <div class="zw-welcome-card">
-        <div class="zw-glow-1"></div>
-        <div class="zw-glow-2"></div>
-        <div class="zw-glow-3"></div>
-
         <div class="zw-content">
             <div class="zw-left">
-                <div class="zw-eyebrow">
+                <div class="zw-badge">
                     <div class="zw-live-dot"></div>
-                    Live Dashboard · Auto-Sync @ {{ $lastUpdate }}
+                    Dashboard · {{ $lastUpdate }}
                 </div>
 
                 <div class="zw-title">
                     Welcome back, <span class="zw-highlight">{{ $userName }}</span> 👋
                 </div>
                 <div class="zw-subtitle">
-                    ZweToe Pharmacy Management System
-                    <span class="zw-time-tag">· {{ now()->format('D, M d Y') }}</span>
+                    ZweToe Pharmacy Management
+                    <span style="color:#94a3b8;">· {{ now()->format('D, M d Y') }}</span>
                 </div>
 
                 <div class="zw-pills">
@@ -141,7 +131,7 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="zw-pill-val" style="color:#10b981;">{{ number_format($todayRevenue) }}</div>
+                            <div class="zw-pill-val" style="color:#059669;">{{ number_format($todayRevenue) }}</div>
                             <div class="zw-pill-lbl">Today's Revenue (MMK)</div>
                         </div>
                     </div>
@@ -154,7 +144,7 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="zw-pill-val" style="color:{{ $pendingOrders > 0 ? '#f59e0b' : '#10b981' }};">{{ $pendingOrders }}</div>
+                            <div class="zw-pill-val" style="color:{{ $pendingOrders > 0 ? '#d97706' : '#059669' }};">{{ $pendingOrders }}</div>
                             <div class="zw-pill-lbl">Pending Orders</div>
                         </div>
                     </div>
@@ -167,7 +157,7 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="zw-pill-val" style="color:#38bdf8;">{{ $totalOrders }}</div>
+                            <div class="zw-pill-val" style="color:#0284c7;">{{ $totalOrders }}</div>
                             <div class="zw-pill-lbl">Total Orders</div>
                         </div>
                     </div>
@@ -180,7 +170,7 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="zw-pill-val" style="color:{{ $lowStockCount > 0 ? '#f43f5e' : '#10b981' }};">{{ $lowStockCount }}</div>
+                            <div class="zw-pill-val" style="color:{{ $lowStockCount > 0 ? '#e11d48' : '#059669' }};">{{ $lowStockCount }}</div>
                             <div class="zw-pill-lbl">Low Stock Items</div>
                         </div>
                     </div>
@@ -194,7 +184,7 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="zw-pill-val" style="color:#8b5cf6;">{{ $pendingCustomers }}</div>
+                            <div class="zw-pill-val" style="color:#7c3aed;">{{ $pendingCustomers }}</div>
                             <div class="zw-pill-lbl">Pending Customers</div>
                         </div>
                     </div>
@@ -202,10 +192,9 @@
                 </div>
             </div>
 
-            {{-- Right Side Graphic --}}
+            {{-- Right Side Icon --}}
             <div class="zw-right">
-                <div class="zw-ring"><div class="zw-ring-dot"></div></div>
-                <svg style="width:52px; height:52px; color:#10b981; opacity:0.85;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <svg style="width:40px; height:40px; color:#059669;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 3H15V9H21V15H15V21H9V15H3V9H9V3Z" />
                 </svg>
             </div>

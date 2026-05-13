@@ -1,48 +1,18 @@
-"use client";
-
-import { usePathname } from "next/navigation";
-import { AuthProvider } from "@/context/AuthContext";
-import { Toaster } from "react-hot-toast";
-import Navbar from "@/components/layout/Navbar";
-import { CartProvider } from "../context/CartContext";
-import AIChatbot from "@/components/ui/AIChatbot";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import ClientShell from "@/components/layout/ClientShell";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-
-  const isCartPage = pathname === "/cart";
-
   return (
     <html lang="en">
-      <body className="bg-[#0a0c10] text-white"> 
-        <Toaster 
-          position="bottom-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#161b22',
-              color: '#fff',
-              border: '1px solid rgba(255,255,255,0.05)',
-            },
-          }}
-        />
-        
-        <AuthProvider>
-          <main className="min-h-screen">
-            <CartProvider>
-              {!isCartPage && <Navbar />}
-              
-              {children}
-              
-              <AIChatbot />
-            </CartProvider>
-          </main>
-        </AuthProvider>
+      <body className={`${inter.className} bg-[#0a0c10] text-white`}>
+        <ClientShell>{children}</ClientShell>
       </body>
     </html>
   );

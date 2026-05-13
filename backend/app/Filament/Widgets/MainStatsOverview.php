@@ -17,61 +17,59 @@ class MainStatsOverview extends BaseWidget
 
     protected function getStats(): array
     {
+        $user = auth()->user();
+        $isAdmin = $user && $user->role === 'admin';
+
+        // ── Metrics ──
         $totalRevenue = Order::where('payment_status', 'paid')->sum('total_amount');
-        $todayRevenue = Order::where('payment_status', 'paid')
-            ->whereDate('created_at', today())
+        $lastMonthRevenue = Order::where('payment_status', 'paid')
+            ->whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])
             ->sum('total_amount');
-        $pendingOrders = Order::where('status', 'pending')->count();
-        $totalOrders   = Order::count();
-        $approvedCustomers = Customer::where('status', 'approved')->count();
-        $pendingCustomers  = Customer::where('status', 'pending')->count();
-        $lowStockCount  = Medicine::where('stock_quantity', '<=', 5)->count();
-        $expiringSoon   = Medicine::whereBetween('expiry_date', [now(), now()->addMonths(1)])->count();
+        $revenueTrendPercent = $lastMonthRevenue > 0 ? (($totalRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100 : 0;
 
-        // 7-day revenue trend for chart sparkline
-        $revenueTrend = collect(range(6, 0))->map(fn ($d) =>
-            Order::whereDate('created_at', Carbon::now()->subDays($d))
-                ->where('payment_status', 'paid')
-                ->sum('total_amount')
-        )->toArray();
+        $totalOrders = Order::count();
+        $pendingCustomers = Customer::where('status', 'pending')->count();
+        $lowStockCount = Medicine::where('stock_quantity', '<=', 10)->count();
 
-        // 7-day pending orders trend
-        $pendingTrend = collect(range(6, 0))->map(fn ($d) =>
-            Order::whereDate('created_at', Carbon::now()->subDays($d))
-                ->where('status', 'pending')
-                ->count()
-        )->toArray();
+        // ── Revenue Chart (Last 7 days) ──
+        $startDate = Carbon::now()->subDays(6)->startOfDay();
+        
+        $revenueData = Order::where('payment_status', 'paid')
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
+            ->groupBy('date')
+            ->pluck('total', 'date');
 
-        return [
-            Stat::make('Total Revenue', number_format($totalRevenue) . ' MMK')
-                ->description(
-                    'Today: ' . number_format($todayRevenue) . ' MMK · ' .
-                    $totalOrders . ' total orders'
-                )
-                ->descriptionIcon('heroicon-m-banknotes')
+        $revenueTrend = collect(range(6, 0))->map(function ($d) use ($revenueData) {
+            $date = Carbon::now()->subDays($d)->format('Y-m-d');
+            return (float) $revenueData->get($date, 0);
+        })->toArray();
+
+        $stats = [];
+
+        if ($isAdmin) {
+            $stats[] = Stat::make('Total Sales', number_format($totalRevenue) . ' MMK')
+                ->description($revenueTrendPercent >= 0 ? '↑ ' . number_format($revenueTrendPercent, 1) . '% growth' : '↓ ' . number_format(abs($revenueTrendPercent), 1) . '% drop')
+                ->descriptionIcon($revenueTrendPercent >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->chart($revenueTrend)
-                ->color('success'),
+                ->color($revenueTrendPercent >= 0 ? 'success' : 'danger');
+        }
 
-            Stat::make('Pending Orders', $pendingOrders)
-                ->description('Awaiting fulfillment — action required')
-                ->descriptionIcon('heroicon-m-clock')
-                ->chart($pendingTrend)
-                ->color($pendingOrders > 10 ? 'danger' : ($pendingOrders > 0 ? 'warning' : 'success')),
+        $stats[] = Stat::make('Total Orders', number_format($totalOrders))
+            ->description('Lifetime volume')
+            ->descriptionIcon('heroicon-m-shopping-cart')
+            ->color('info');
 
-            Stat::make('Active Customers', $approvedCustomers)
-                ->description($pendingCustomers . ' awaiting verification')
-                ->descriptionIcon('heroicon-m-user-group')
-                ->chart([15, 18, 22, 25, 28, 32, $approvedCustomers])
-                ->color('info'),
+        $stats[] = Stat::make('Pending Customers', number_format($pendingCustomers))
+            ->description($pendingCustomers > 0 ? 'Requires approval' : 'All clear')
+            ->descriptionIcon('heroicon-m-user-plus')
+            ->color($pendingCustomers > 0 ? 'warning' : 'gray');
 
-            Stat::make('Stock Alerts', $lowStockCount)
-                ->description(
-                    $lowStockCount > 0 ? 'Critical: refill immediately' : 'Inventory healthy' .
-                    ($expiringSoon > 0 ? " · {$expiringSoon} expiring" : '')
-                )
-                ->descriptionIcon($lowStockCount > 0 ? 'heroicon-m-exclamation-triangle' : 'heroicon-m-check-circle')
-                ->chart([40, 35, 30, 25, 20, 15, max(0, $lowStockCount)])
-                ->color($lowStockCount > 0 ? 'danger' : 'success'),
-        ];
+        $stats[] = Stat::make('Low Stock Inventory', number_format($lowStockCount))
+            ->description($lowStockCount > 0 ? 'Restock needed' : 'Healthy inventory')
+            ->descriptionIcon('heroicon-m-beaker')
+            ->color($lowStockCount > 0 ? 'danger' : 'success');
+
+        return $stats;
     }
 }

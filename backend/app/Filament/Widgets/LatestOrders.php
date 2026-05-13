@@ -9,7 +9,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class LatestOrders extends BaseWidget
 {
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 5;
     protected int | string | array $columnSpan = 'full';
     protected function getHeading(): ?string { return 'Recent Orders'; }
 
@@ -34,7 +34,8 @@ class LatestOrders extends BaseWidget
                     ->label('Amount')
                     ->formatStateUsing(fn ($state) => number_format($state) . ' MMK')
                     ->weight('bold')
-                    ->color('success'),
+                    ->color('success')
+                    ->visible(fn () => auth()->user()->role === 'admin'),
 
                 Tables\Columns\IconColumn::make('payment_screenshot')
                     ->label('Receipt')
@@ -42,7 +43,8 @@ class LatestOrders extends BaseWidget
                     ->trueIcon('heroicon-o-camera')
                     ->falseIcon('heroicon-o-x-circle')
                     ->trueColor('info')
-                    ->falseColor('gray'),
+                    ->falseColor('gray')
+                    ->visible(fn () => auth()->user()->role === 'admin'),
 
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
@@ -68,7 +70,8 @@ class LatestOrders extends BaseWidget
                         'pending' => 'danger',
                         'paid'    => 'success',
                         default   => 'gray',
-                    }),
+                    })
+                    ->visible(fn () => auth()->user()->role === 'admin'),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Date')

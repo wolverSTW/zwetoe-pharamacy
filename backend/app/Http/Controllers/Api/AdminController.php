@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Medicine;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class AdminController extends Controller
 {
@@ -23,14 +24,19 @@ class AdminController extends Controller
     public function getDashboardStats()
     {
         $this->checkAdmin();
-        return response()->json([
-            'status' => 'success',
-            'data' => [
+
+        $stats = Cache::remember('admin_dashboard_stats', now()->addSeconds(60), function () {
+            return [
                 'total_customers' => Customer::count(),
                 'pending_approvals' => Customer::where('status', 'pending')->count(),
                 'total_medicines' => Medicine::count(),
                 'total_orders' => Order::count(),
-            ]
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $stats,
         ]);
     }
 
@@ -61,7 +67,7 @@ class AdminController extends Controller
     {
         $this->checkAdmin();
         $request->validate([
-            'status' => 'required|in:active,pending,suspended',
+            'status' => 'required|in:pending,approved,rejected',
         ]);
 
         $customer = Customer::find($id);
@@ -73,6 +79,8 @@ class AdminController extends Controller
         $customer->update([
             'status' => $request->status
         ]);
+
+        Cache::forget('admin_dashboard_stats');
 
         return response()->json([
             'status' => 'success',
@@ -91,6 +99,7 @@ class AdminController extends Controller
         
         if ($customer) {
             $customer->delete();
+            Cache::forget('admin_dashboard_stats');
             return response()->json(['message' => 'Customer deleted successfully']);
         }
 

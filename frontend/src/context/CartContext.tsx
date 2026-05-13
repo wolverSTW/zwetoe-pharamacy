@@ -1,30 +1,38 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { CartItem, CartProduct } from "@/types/store";
 
-const CartContext = createContext<any>(null);
+interface CartContextType {
+  cart: CartItem[];
+  addToCart: (product: CartProduct, quantity?: number) => void;
+  removeFromCart: (id: number) => void;
+  clearCart: () => void;
+  updateQuantity: (id: number, quantity: number) => void;
+  totalAmount: number;
+  totalItems: number;
+}
+
+const CartContext = createContext<CartContextType | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [cart, setCart] = useState<any[]>([]); 
-
-  // 1. Load cart from LocalStorage on startup
-  useEffect(() => {
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch (e) {
-        console.error("Failed to parse cart", e);
-      }
+  // Initialize cart from localStorage synchronously to avoid the effect-setState issue
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const savedCart = localStorage.getItem("cart");
+      return savedCart ? (JSON.parse(savedCart) as CartItem[]) : [];
+    } catch {
+      return [];
     }
-  }, []);
+  });
 
-  // 2. Save cart to LocalStorage whenever it changes
+  // Save cart to LocalStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: any, quantity: number = 1) => {
+  const addToCart = useCallback((product: CartProduct, quantity: number = 1) => {
     setCart((prev) => {
       const existingItem = prev.find((item) => item.id === product.id);
       if (existingItem) {
@@ -34,22 +42,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, { ...product, quantity }];
     });
-  };
+  }, []);
 
-  const removeFromCart = (id: number) => {
+  const removeFromCart = useCallback((id: number) => {
     setCart((prev) => prev.filter((item) => item.id !== id));
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart([]);
     localStorage.removeItem("cart");
-  };
+  }, []);
 
-  const updateQuantity = (id: number, quantity: number) => {
+  const updateQuantity = useCallback((id: number, quantity: number) => {
     setCart((prev) =>
       prev.map((item) => (item.id === id ? { ...item, quantity } : item))
     );
-  };
+  }, []);
 
   const totalAmount = cart.reduce(
     (total, item) => total + (item.sell_price || item.price || 0) * item.quantity,

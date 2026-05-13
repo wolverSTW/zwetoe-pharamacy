@@ -7,10 +7,11 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements FilamentUser
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     const ROLE_ADMIN = 'admin';
     const ROLE_STAFF = 'staff';
@@ -39,9 +40,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_STAFF]) 
-               && $this->is_approve === true;
-
+        return $this->is_approve && in_array($this->role, [self::ROLE_ADMIN, self::ROLE_STAFF]);
     }
 
     public function isAdmin(): bool { return $this->role === self::ROLE_ADMIN; }

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 class WelcomeBanner extends Widget
 {
     protected static ?int $sort = -1;
+    protected static bool $isDiscovered = false; // Disabled — replaced by custom dashboard
     protected static ?string $pollingInterval = '60s';
     protected int | string | array $columnSpan = 'full';
 

@@ -11,8 +11,8 @@ use Filament\Widgets\TableWidget as BaseWidget;
 class LatestStock extends BaseWidget
 {
     protected int | string | array $columnSpan = 1;
-    protected static ?int $sort = 4;
-    protected function getHeading(): ?string { return '⚠️ Critical Stock — Refill Needed'; }
+    protected static ?int $sort = 8;
+    protected function getHeading(): ?string { return 'Low Stock Items'; }
 
     public function table(Table $table): Table
     {

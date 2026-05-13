@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Medicine;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class MedicineController extends Controller
 {
@@ -13,23 +14,27 @@ class MedicineController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Fetch medicines with their category information (Eager Loading)
-        // 2. Filter only items in stock
-        $query = Medicine::with('category') 
-            ->select('id', 'category_id', 'name', 'generic_name', 'sell_price', 'stock_quantity', 'image')
-            ->where('stock_quantity', '>', 0);
+        // Build a cache key that varies by category filter
+        $cacheKey = 'medicines_list_' . ($request->get('category_id', 'all'));
 
-        if ($request->has('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
+        $medicines = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($request) {
+            $query = Medicine::with('category:id,name')
+                ->select('id', 'category_id', 'name', 'generic_name', 'sell_price', 'stock_quantity', 'image')
+                ->where('stock_quantity', '>', 0)
+                ->where('is_active', true);
 
-        $medicines = $query->latest()->get();
+            if ($request->has('category_id')) {
+                $query->where('category_id', $request->category_id);
+            }
+
+            return $query->orderBy('name')->get();
+        });
 
         return response()->json([
             'status' => 'success',
-            'count' => $medicines->count(),
-            'data' => $medicines
-        ], 200);
+            'count'  => $medicines->count(),
+            'data'   => $medicines
+        ], 200)->header('Cache-Control', 'public, max-age=300');
     }
 
     /**
@@ -58,16 +63,29 @@ class MedicineController extends Controller
      */
     public function search(Request $request)
     {
-        $query = $request->get('q');
-        
-        $medicines = Medicine::with('category')
-            ->where('name', 'LIKE', "%{$query}%")
-            ->orWhere('description', 'LIKE', "%{$query}%")
-            ->get();
+        $term = $request->get('q', '');
+
+        if (strlen($term) < 2) {
+            return response()->json(['status' => 'success', 'data' => []]);
+        }
+
+        // Cache search results for 2 minutes per unique query
+        $medicines = Cache::remember('search_' . md5($term), now()->addMinutes(2), function () use ($term) {
+            return Medicine::with('category:id,name')
+                ->select('id', 'category_id', 'name', 'generic_name', 'sell_price', 'stock_quantity', 'image')
+                ->where(function ($q) use ($term) {
+                    $q->where('name', 'LIKE', "%{$term}%")
+                      ->orWhere('generic_name', 'LIKE', "%{$term}%");
+                })
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->limit(30)
+                ->get();
+        });
 
         return response()->json([
             'status' => 'success',
-            'data' => $medicines
+            'data'   => $medicines
         ], 200);
     }
 }
