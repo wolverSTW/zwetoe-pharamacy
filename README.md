@@ -65,13 +65,13 @@ Located in the `/frontend` directory, the frontend client delivers a high-perfor
 
 ```bash
 cd backend
-cp .env.example .env          # Windows: copy .env.example .env
+cp .env.example .env 
 composer install
 php artisan key:generate
 php artisan migrate --seed
 php artisan storage:link
-npm install                    # Required for Vite/Tailwind asset compilation
-php artisan serve              # Or: composer run dev (serves app + queue + logs + Vite)
+npm install   
+php artisan serve
 ```
 
 ### Frontend
